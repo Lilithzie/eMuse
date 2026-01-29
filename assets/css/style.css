@@ -156,7 +156,8 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #6c757d 0%, #5a6169 100%);
+    background: linear-gradient(135deg, var(--btn-bg) 0%, var(--smoky-oak) 50%, var(--cocoa-bark) 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .login-container {
@@ -166,35 +167,112 @@ body {
 }
 
 .login-box {
-    background: var(--color-bg-card);
-    border-radius: 12px;
+    background: var(--bg-color);
+    border-radius: 16px;
     padding: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(207, 187, 159, 0.1);
+    border: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    opacity: 0.1;
+    pointer-events: none;
 }
 
 .login-header {
     text-align: center;
     margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
 }
 
 .login-header h1 {
-    font-size: 32px;
-    color: var(--color-primary);
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--golden-sand) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
 .login-header p {
-    color: var(--color-text-secondary);
-    font-size: 14px;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 .login-footer {
     text-align: center;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid var(--color-border);
-    font-size: 13px;
-    color: var(--color-text-secondary);
+    border-top: 2px solid var(--accent);
+    font-size: 0.85rem;
+    color: var(--text-dark);
+}
+
+.login-footer p {
+    margin: 0;
+}
+
+.login-footer strong {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Login Form Styling */
+.login-box form {
+    position: relative;
+    z-index: 1;
+}
+
+.login-box .form-group {
+    margin-bottom: 18px;
+}
+
+.login-box .form-group input {
+    padding: 12px 16px;
+    border: 2px solid var(--accent);
+    background: rgba(207, 187, 159, 0.05);
+}
+
+.login-box .form-group input::placeholder {
+    color: var(--text-dark);
+    opacity: 0.6;
+}
+
+.login-box .btn-block {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, var(--btn-bg) 0%, var(--smoky-oak) 100%);
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(90, 73, 57, 0.2);
+}
+
+.login-box .btn-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(90, 73, 57, 0.35);
+}
+
+.login-box .btn-block:active {
+    transform: translateY(0);
 }
 
 /* Admin Layout */
@@ -527,30 +605,35 @@ body {
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    font-size: 14px;
+    padding: 12px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
     font-family: inherit;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(90, 97, 105, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(207, 187, 159, 0.15);
+    background-color: rgba(207, 187, 159, 0.02);
 }
 
 .form-row {
@@ -687,9 +770,13 @@ body {
 }
 
 .alert-error {
-    background: #f5f6f7;
-    color: #5a6169;
-    border-left: 4px solid #a67474;
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+    color: #c62828;
+    border-left: 4px solid #f44336;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 /* Scanner */
