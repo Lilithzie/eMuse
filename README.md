@@ -36,7 +36,7 @@ A comprehensive web-based museum management system built with PHP and MySQL.
 
    b. Import database:
    - Open phpMyAdmin: http://localhost/phpmyadmin
-   - Create a new database named `eMuse_db`
+   - Create a new database named `emuse_db`
    - Import the SQL file: `database/museum_db.sql`
 
    c. Start XAMPP:
