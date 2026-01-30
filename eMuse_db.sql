@@ -151,3 +151,5 @@ INSERT INTO locations (name, floor, capacity, description) VALUES
 ('West Wing', '2nd Floor', 75, 'Rotating exhibitions'),
 ('Special Collections', '2nd Floor', 30, 'Premium exhibits'),
 ('Sculpture Garden', 'Ground Floor', 150, 'Outdoor sculpture display');
+
+

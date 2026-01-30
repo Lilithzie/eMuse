@@ -8,19 +8,15 @@ include 'includes/user-header.php';
         <div class="hero-inner">
             <div>
                 <h1>Welcome to eMuse</h1>
-                <p>Discover the world's finest collections, explore cultural treasures, and experience art like never before.</p>
+                <h3> ______________________________________________________</h3>
+                <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you’re visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
                 <div class="hero-cta">
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
                     <a href="tickets.php" class="btn btn-outline-primary btn-lg">Book Your Visit</a>
                 </div>
             </div>
             <div class="hero-media">
-                <svg width="100%" height="100%" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); border-radius: var(--card-radius);">
-                    <circle cx="100" cy="150" r="80" fill="var(--text-dark)" opacity="0.1"/>
-                    <circle cx="300" cy="350" r="100" fill="var(--accent)" opacity="0.2"/>
-                    <rect x="50" y="200" width="300" height="200" fill="none" stroke="var(--accent)" stroke-width="2" rx="20" opacity="0.3"/>
-                    <text x="200" y="280" text-anchor="middle" font-size="24" fill="var(--text-dark)" opacity="0.2" font-family="Arial">Museum</text>
-                </svg>
+                <img src="img/hero.jpg" alt="eMuse Museum Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--card-radius);">
             </div>
         </div>
     </section>
@@ -232,9 +228,9 @@ include 'includes/user-header.php';
                                             <div class="product-actions" style="margin-top: 1rem;">
                                                 <a href="tours.php?id=<?php echo $tour['tour_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%; margin-bottom: 0.5rem;">Book Tour</a>
                                                 <?php if ($available > 0): ?>
-                                                    <span class="card-badge" style="display: inline-block; width: 100%; background-color: #4CAF50; color: white;"><?php echo $available; ?> Spots Available</span>
+                                                    <span class="card-badge" style="display: inline-block; width: 100%; color: white;"><?php echo $available; ?> Spots Available</span>
                                                 <?php else: ?>
-                                                    <span class="card-badge" style="display: inline-block; width: 100%; background-color: #f44336; color: white;">Tour Full</span>
+                                                    <span class="card-badge" style="display: inline-block; width: 100%; color: white;">Tour Full</span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -256,8 +252,8 @@ include 'includes/user-header.php';
         <!-- Call to Action -->
         <section class="section">
             <div class="info-box" style="text-align: center; padding: 3rem 2rem;">
-                <h3 style="font-size: 1.8rem; color: #070059; margin-bottom: 1rem;">Ready for Your Museum Experience?</h3>
-                <p style="font-size: 1.1rem; color: #333; margin-bottom: 2rem;">Plan your visit today and discover the wonders that await you.</p>
+                <h3 style="font-size: 1.8rem;  margin-bottom: 1rem;">Ready for Your Museum Experience?</h3>
+                <p style="font-size: 1.1rem;  margin-bottom: 2rem;">Plan your visit today and discover the wonders that await you.</p>
                 <div class="hero-buttons" style="justify-content: center;">
                     <a href="tickets.php" class="btn btn-primary">Purchase Tickets</a>
                     <a href="tours.php" class="btn btn-secondary">Schedule a Guided Tour</a>

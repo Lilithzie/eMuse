@@ -14,7 +14,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="index.php"><strong>eMuse</strong></a>
+                <a href="index.php"><strong>eMuse ❤︎</strong></a>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">

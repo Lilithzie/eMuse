@@ -20,9 +20,10 @@
             </div>
             <div class="footer-section">
                 <h4>Contact Information</h4>
-                <p><strong>Email:</strong><br><a href="mailto:info@emuse.museum" style="padding-left: 0;">info@emuse.museum</a></p>
+                <p><strong>Email:</strong><br><a href="mail to:eMuseoficial@gmailmuseum" style="padding-left: 0;">eMuseoficial@gmailmuseum</a></p>
                 <p><strong>Phone:</strong><br><a href="tel:+15551234567" style="padding-left: 0;">+1 (555) 123-4567</a></p>
                 <p><strong>Hours:</strong><br>Mon - Sun: 9:00 AM - 6:00 PM</p>
+                <p><strong>Location:</strong><br>118 Art District Avenue Culture City,</p>
             </div>
         </div>
         <div class="footer-bottom">

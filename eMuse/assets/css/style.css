@@ -5,7 +5,7 @@
 
 /* Root Variables - Updated Color Palette */
 :root {
-    --primary-dark: #070059;
+    --primary-dark: #ffd09b85;
     --primary-light: #DDCAAA;
     --primary-accent: #F5F5DC;
     --text-dark: #333;
@@ -17,16 +17,16 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     /* Legacy variables for compatibility */
-    --color-primary: #070059;
-    --color-primary-dark: #050047;
+    --color-primary: #ffd09b85;
+    --color-primary-dark: #ffd09b85;
     --color-secondary: #DDCAAA;
     --color-bg-main: #f5f6f7;
     --color-bg-card: #ffffff;
     --color-text-primary: #2c3338;
     --color-text-secondary: #6c757d;
     --color-border: #dee2e6;
-    --color-sidebar: #070059;
-    --color-sidebar-hover: #0d0066;
+    --color-sidebar: #ffd09b85;
+    --color-sidebar-hover: #ffd09b85;
     --color-success: #6c8e7f;
     --color-warning: #a88f5e;
     --color-error: #a67474;
@@ -41,10 +41,20 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: var(--color-bg-main);
+    margin: 0;
+    padding: 0;
+    font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background-color: var(--color-bg-main);
     color: var(--color-text-primary);
-    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* headings */
+h1, h2, h3, .navbar-brand {
+  font-family: "Playfair Display", Georgia, serif;
+  color: var(--text-dark);
+  letter-spacing: 0.2px;
 }
 
 /* Login Page */

@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     </div>
                 </div>
                 <div style="margin-top: 1.5rem; padding: 1rem; background: var(--primary-accent); border-radius: 4px; color: #333;">
-                    <p style="font-size: 0.95rem;"><strong>ℹ️ Children under 3 enter free.</strong></p>
+                    <p style="font-size: 0.95rem;"><strong> ᯓ★ Children under 3 enter free.</strong></p>
                 </div>
             </div>
 
@@ -163,11 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 </div>
                 <div>
                     <h4 style="color: var(--primary-dark); margin-bottom: 0.5rem;">⏰ Operating Hours</h4>
-                    <p>Monday - Friday: 9 AM - 5 PM<br>Saturday - Sunday: 10 AM - 6 PM<br>Closed on major holidays</p>
-                </div>
-                <div>
-                    <h4 style="color: var(--primary-dark); margin-bottom: 0.5rem;">📍 Location</h4>
-                    <p>eMuse Museum<br>123 Art District Avenue<br>Culture City, CC 12345</p>
+                    <p>Monday - Friday: 9AM-5PM<br>Saturday - Sunday: 10AM-6PM<br>Closed on major holidays</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary-dark); margin-bottom: 0.5rem;">✓ What's Included</h4>
