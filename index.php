@@ -23,9 +23,7 @@ include 'includes/user-header.php';
 
     <!-- Featured Classifications Section -->
     <section class="py-5 featured-brands">
-        <div class="container">
             <h3 class="mb-3 text-center">Explore by Classification</h3>
-            <div class="brands-card">
                 <div class="brand-logos">
                     <?php
                     try {
