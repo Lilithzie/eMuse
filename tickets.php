@@ -21,14 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         } else {
             // Get ticket price based on type
             $price_map = [
-                'adult' => 25.00,
-                'child' => 15.00,
-                'senior' => 18.00,
-                'student' => 20.00,
-                'group' => 22.00
+                'adult' => 500.00,
+                'child' => 400.00,
+                'senior' => 350.00,
+                'student' => 350.00,
+                'group' => 400.00
             ];
 
-            $price = $price_map[$ticket_type] ?? 25.00;
+            $price = $price_map[$ticket_type] ?? 500.00;
             $total_price = $price * $quantity;
 
             // Create tickets
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 ]);
             }
 
-            $message = 'Success! ' . $quantity . ' ticket(s) have been purchased. Total: $' . number_format($total_price, 2) . '. Confirmation sent to ' . htmlspecialchars($visitor_email) . '.';
+            $message = 'Success! ' . $quantity . ' ticket(s) have been purchased. Total: PHP ' . number_format($total_price, 2) . '. Confirmation sent to ' . htmlspecialchars($visitor_email) . '.';
             $message_type = 'success';
         }
     } catch (Exception $e) {
@@ -81,23 +81,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
                         <span><strong>Adult</strong><br><small style="color: #666;">Ages 18+</small></span>
-                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">$25.00</span>
+                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">PHP 500.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
                         <span><strong>Child</strong><br><small style="color: #666;">Ages 3-17</small></span>
-                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">$15.00</span>
+                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">PHP 400.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
                         <span><strong>Senior</strong><br><small style="color: #666;">Ages 65+</small></span>
-                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">$18.00</span>
+                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">PHP 350.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
                         <span><strong>Student</strong><br><small style="color: #666;">Valid ID required</small></span>
-                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">$20.00</span>
+                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">PHP 350.00</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span><strong>Group Rate</strong><br><small style="color: #666;">10+ tickets</small></span>
-                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">$22.00</span>
+                        <span style="font-size: 1.3rem; font-weight: 600; color: var(--primary-dark);">PHP 400.00/person</span>
                     </div>
                 </div>
                 <div style="margin-top: 1.5rem; padding: 1rem; background: var(--primary-accent); border-radius: 4px; color: #333;">
@@ -130,11 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         <label for="ticket_type">Ticket Type *</label>
                         <select id="ticket_type" name="ticket_type" required>
                             <option value="">-- Select Ticket Type --</option>
-                            <option value="adult">Adult ($25.00)</option>
-                            <option value="child">Child ($15.00)</option>
-                            <option value="senior">Senior ($18.00)</option>
-                            <option value="student">Student ($20.00)</option>
-                            <option value="group">Group Rate ($22.00)</option>
+                            <option value=\"adult\">Adult (PHP 500.00)</option>
+                            <option value=\"child\">Child (PHP 400.00)</option>
+                            <option value=\"senior\">Senior (PHP 350.00)</option>
+                            <option value=\"student\">Student (PHP 350.00)</option>
+                            <option value=\"group\">Group Rate (PHP 400.00/person)</option>
                         </select>
                     </div>
 
