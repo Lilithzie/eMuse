@@ -8,6 +8,7 @@
   --chestnut-grove: #5A4939;
   --smoky-oak: rgb(109, 96, 83);
   --cocoa-bark: #2C1A11;
+  --royal-gold: #D4AF37;
 
   --bg-color: #ab9980;
   --accent: var(--golden-sand);
@@ -80,7 +81,7 @@ body::before {
     right: 0;
     /* allow the pseudo-element to extend as the page grows */
     min-height: 100%;
-    background-image: url("../../img/background.jpg"); /* replace with your image filename (place in project root img/) */
+    background-image: url("../../img/background.jpg"); 
     background-repeat: no-repeat;
     background-position: center top;
     background-size: cover;
@@ -339,13 +340,11 @@ h1, h2, h3, .navbar-brand {
 
 .login-header h1 {
     font-size: 2.5rem;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--golden-sand) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--royal-gold);
     margin-bottom: 8px;
     font-weight: 700;
     letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .login-header p {
@@ -763,7 +762,7 @@ form {
 
 .btn-icon:hover {
     background: var(--color-bg-main);
-    color: var(--color-primary);
+    color: var(--text-light);
 }
 
 /* Button Groups and Actions */
@@ -898,7 +897,7 @@ form {
     text-align: left;
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--royal-gold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -912,6 +911,7 @@ form {
 
 .data-table tbody tr:hover {
     background: var(--color-bg-main);
+    color: var(--text-light);
 }
 
 /* Badges */
@@ -922,7 +922,7 @@ form {
     font-size: 12px;
     font-weight: 500;
     background: var(--color-bg-main);
-    color: var(--color-text-primary);
+    color: var(--text-light);
 }
 
 .badge-confirmed,
@@ -1180,7 +1180,7 @@ form {
 
 .hero-inner h1 {
     font-size: 3rem;
-    color: var(--text-dark);
+    color: var(--text-light);
     margin-bottom: var(--spacing-md);
     line-height: 1.2;
     font-weight: 700;
@@ -1188,7 +1188,7 @@ form {
 
 .hero-inner > div:first-child > p {
     font-size: 1.1rem;
-    color: var(--text-dark);
+    color: var(--text-light);
     margin-bottom: var(--spacing-lg);
 }
 
