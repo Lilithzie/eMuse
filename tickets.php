@@ -19,16 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $message = 'Please fill in all required fields.';
             $message_type = 'error';
         } else {
-            // Get ticket price based on type
-            $price_map = [
-                'adult' => 500.00,
-                'child' => 400.00,
-                'senior' => 350.00,
-                'student' => 350.00,
-                'group' => 400.00
-            ];
-
-            $price = $price_map[$ticket_type] ?? 500.00;
+            // Get ticket price from ticket_types table
+            $tt_stmt = $pdo->prepare("SELECT price FROM ticket_types WHERE ticket_type = ?");
+            $tt_stmt->execute([$ticket_type]);
+            $tt = $tt_stmt->fetch();
+            $price = $tt ? (float)$tt['price'] : 0;
             $total_price = $price * $quantity;
 
             // Create tickets
@@ -36,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $ticket_code = strtoupper('TK' . date('YmdHis') . rand(1000, 9999));
                 
                 $insert_stmt = $pdo->prepare("INSERT INTO tickets 
-                    (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, price, visit_date, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed')");
+                    (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, visit_date, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, 'confirmed')");
                 
                 $insert_stmt->execute([
                     $ticket_code,
@@ -45,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     $visitor_email,
                     $visitor_phone,
                     $ticket_type,
-                    $price,
                     $visit_date
                 ]);
             }

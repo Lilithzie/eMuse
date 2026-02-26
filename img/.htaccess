@@ -1,0 +1,21 @@
+# Security for artwork uploads
+# Only allow image files
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Deny hidden/dot-files (e.g. .htaccess itself)
+<FilesMatch "^\.">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Prevent PHP execution
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Prevent directory browsing
+Options -Indexes

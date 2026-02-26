@@ -14,23 +14,23 @@ if (isset($_GET['delete'])) {
 $filter = $_GET['filter'] ?? 'all';
 $search = $_GET['search'] ?? '';
 
-$query = "SELECT * FROM tickets WHERE 1=1";
+$query = "SELECT t.*, tt.price FROM tickets t LEFT JOIN ticket_types tt ON t.ticket_type = tt.ticket_type WHERE 1=1";
 $params = [];
 
 if ($filter != 'all') {
-    $query .= " AND status = ?";
+    $query .= " AND t.status = ?";
     $params[] = $filter;
 }
 
 if ($search) {
-    $query .= " AND (ticket_code LIKE ? OR visitor_name LIKE ? OR visitor_email LIKE ?)";
+    $query .= " AND (t.ticket_code LIKE ? OR t.visitor_name LIKE ? OR t.visitor_email LIKE ?)";
     $searchTerm = "%$search%";
     $params[] = $searchTerm;
     $params[] = $searchTerm;
     $params[] = $searchTerm;
 }
 
-$query .= " ORDER BY purchase_date DESC LIMIT 100";
+$query .= " ORDER BY t.purchase_date DESC LIMIT 100";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);

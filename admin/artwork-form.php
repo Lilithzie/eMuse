@@ -23,12 +23,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acquisition_date = $_POST['acquisition_date'];
     $condition_status = $_POST['condition_status'];
     
+    // Handle image upload
+    $image_path = $artwork['image_path'] ?? '';
+    if (isset($_FILES['artwork_image']) && $_FILES['artwork_image']['error'] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $file_type = $_FILES['artwork_image']['type'];
+        
+        if (in_array($file_type, $allowed_types)) {
+            $file_extension = strtolower(pathinfo($_FILES['artwork_image']['name'], PATHINFO_EXTENSION));
+            $filename = 'artwork_' . time() . '_' . uniqid() . '.' . $file_extension;
+            $upload_path = '../img/' . $filename;
+            
+            if (move_uploaded_file($_FILES['artwork_image']['tmp_name'], $upload_path)) {
+                // Delete old image if updating and new image uploaded
+                if ($editMode && !empty($artwork['image_path']) && file_exists('../' . $artwork['image_path'])) {
+                    unlink('../' . $artwork['image_path']);
+                }
+                $image_path = 'img/' . $filename;
+            }
+        }
+    }
+    
     if ($editMode) {
-        $stmt = $pdo->prepare("UPDATE artworks SET title = ?, artist = ?, type = ?, description = ?, year_created = ?, exhibit_id = ?, location_id = ?, acquisition_date = ?, condition_status = ? WHERE artwork_id = ?");
-        $stmt->execute([$title, $artist, $type, $description, $year_created, $exhibit_id, $location_id, $acquisition_date, $condition_status, $_GET['id']]);
+        $stmt = $pdo->prepare("UPDATE artworks SET title = ?, artist = ?, type = ?, description = ?, year_created = ?, exhibit_id = ?, location_id = ?, acquisition_date = ?, condition_status = ?, image_path = ? WHERE artwork_id = ?");
+        $stmt->execute([$title, $artist, $type, $description, $year_created, $exhibit_id, $location_id, $acquisition_date, $condition_status, $image_path, $_GET['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO artworks (title, artist, type, description, year_created, exhibit_id, location_id, acquisition_date, condition_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $artist, $type, $description, $year_created, $exhibit_id, $location_id, $acquisition_date, $condition_status]);
+        $stmt = $pdo->prepare("INSERT INTO artworks (title, artist, type, description, year_created, exhibit_id, location_id, acquisition_date, condition_status, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $artist, $type, $description, $year_created, $exhibit_id, $location_id, $acquisition_date, $condition_status, $image_path]);
     }
     
     header('Location: artworks.php?success=saved');
@@ -47,7 +68,7 @@ include 'includes/header.php';
 </div>
 
 <div class="card">
-    <form method="POST" action="">
+    <form method="POST" action="" enctype="multipart/form-data">
         <div class="form-row">
             <div class="form-group">
                 <label for="title">Artwork Title *</label>
@@ -127,6 +148,25 @@ include 'includes/header.php';
             <div class="form-group full-width">
                 <label for="description">Description</label>
                 <textarea id="description" name="description" rows="5"><?php echo $artwork['description'] ?? ''; ?></textarea>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label for="artwork_image">Artwork Photo</label>
+                <?php if ($editMode && !empty($artwork['image_path'])): ?>
+                    <div class="current-image" style="margin-bottom: 1rem;">
+                        <img src="../<?php echo $artwork['image_path']; ?>" alt="Current artwork image" 
+                             style="max-width: 200px; max-height: 200px; border-radius: 4px; border: 1px solid #ddd;"
+                             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ Failed to load: ../<?php echo addslashes($artwork['image_path']); ?>';">
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Current image (upload new image to replace)</p>
+                    </div>
+                <?php elseif ($editMode): ?>
+                    <p style="color: #999; font-style: italic; margin-bottom: 1rem;">No image currently uploaded for this artwork.</p>
+                <?php endif; ?>
+                <input type="file" id="artwork_image" name="artwork_image" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" style="width: 100%;">
+                <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 0.5rem;">Supported formats: JPEG, PNG, GIF, WebP (Max size: 5MB)</small>
+                <!-- Debug: Edit mode: <?php echo $editMode ? 'YES' : 'NO'; ?>, Image path value: "<?php echo htmlspecialchars($artwork['image_path'] ?? 'NULL'); ?>" -->
             </div>
         </div>
         

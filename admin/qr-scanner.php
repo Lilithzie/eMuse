@@ -6,7 +6,7 @@ checkAuth();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ticket_code'])) {
     $ticket_code = sanitize($_POST['ticket_code']);
     
-    $stmt = $pdo->prepare("SELECT * FROM tickets WHERE ticket_code = ?");
+    $stmt = $pdo->prepare("SELECT t.*, tt.price FROM tickets t LEFT JOIN ticket_types tt ON t.ticket_type = tt.ticket_type WHERE t.ticket_code = ?");
     $stmt->execute([$ticket_code]);
     $ticket = $stmt->fetch();
     

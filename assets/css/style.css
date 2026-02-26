@@ -8,7 +8,6 @@
   --chestnut-grove: #5A4939;
   --smoky-oak: rgb(109, 96, 83);
   --cocoa-bark: #2C1A11;
-  --royal-gold: #D4AF37;
 
   --bg-color: #ab9980;
   --accent: var(--golden-sand);
@@ -243,7 +242,7 @@ h1, h2, h3, .navbar-brand {
 
 .login-header h1 {
     font-size: 2.5rem;
-    color: var(--royal-gold);
+    color: var(--cream-harvest);
     margin-bottom: 8px;
     font-weight: 700;
     letter-spacing: 2px;
@@ -800,7 +799,7 @@ form {
     text-align: left;
     font-size: 13px;
     font-weight: 600;
-    color: var(--royal-gold);
+    color: var(--cream-harvest);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -813,7 +812,6 @@ form {
 }
 
 .data-table tbody tr:hover {
-    background: var(--color-bg-main);
     color: var(--text-light);
 }
 
@@ -1566,4 +1564,60 @@ blockquote {
     .nav-logo a {
         font-size: 1.4rem;
     }
+}
+
+/* Artwork Image Styles */
+.card-image {
+    position: relative;
+    background: var(--accent);
+    margin: -24px -24px 20px -24px;
+}
+
+.card-image img {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-image img {
+    transform: scale(1.02);
+}
+
+.current-image {
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--card-bg);
+}
+
+.current-image img {
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Admin table artwork images */
+.data-table img {
+    transition: transform 0.2s ease;
+}
+
+.data-table img:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* File input styling */
+input[type="file"] {
+    padding: 8px;
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    background: var(--card-bg);
+    transition: border-color 0.3s ease;
+}
+
+input[type="file"]:hover {
+    border-color: var(--accent);
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: var(--btn-bg);
 }

@@ -50,7 +50,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             <?php
             try {
                 $query = "SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                 a.description, a.condition_status, l.name as location, l.floor,
+                                 a.description, a.condition_status, a.image_path, l.name as location, l.floor,
                                  e.title as exhibit_title
                           FROM artworks a 
                           LEFT JOIN locations l ON a.location_id = l.location_id
@@ -77,7 +77,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                     $params[] = $search_pattern;
                 }
 
-                $query .= " ORDER BY a.title ASC";
+                $query .= " ORDER BY a.artwork_id ASC";
 
                 $stmt = $pdo->prepare($query);
                 $stmt->execute($params);
@@ -88,6 +88,13 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                         $type_label = ucfirst($artwork['type']);
                         ?>
                         <div class="card">
+                            <?php if (!empty($artwork['image_path'])): ?>
+                                <div class="card-image" style="height: 200px; overflow: hidden; border-radius: 8px 8px 0 0;">
+                                    <img src="<?php echo htmlspecialchars($artwork['image_path']); ?>" 
+                                         alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            <?php endif; ?>
                             <div class="card-header">
                                 <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
                                 <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
@@ -118,16 +125,6 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                                     </span>
                                 </p>
 
-                                <!-- Exhibit Info -->
-                                <?php if ($artwork['exhibit_title']): ?>
-                                <p class="text-muted" style="margin-top: 0.5rem;">
-                                    <strong>On Display:</strong> 
-                                    <a href="exhibits.php?id=<?php echo htmlspecialchars($artwork['exhibit_id']); ?>" 
-                                       style="color: var(--primary-light); text-decoration: none;">
-                                        <?php echo htmlspecialchars($artwork['exhibit_title']); ?>
-                                    </a>
-                                </p>
-                                <?php endif; ?>
                             </div>
                         </div>
                         <?php

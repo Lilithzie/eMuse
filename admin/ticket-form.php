@@ -7,14 +7,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $visitor_email = sanitize($_POST['visitor_email']);
     $visitor_phone = sanitize($_POST['visitor_phone']);
     $ticket_type = $_POST['ticket_type'];
-    $price = (float)$_POST['price'];
     $visit_date = $_POST['visit_date'];
-    
+
+    // Look up price from ticket_types (3NF: price lives in ticket_types, not tickets)
+    $tt_stmt = $pdo->prepare("SELECT price FROM ticket_types WHERE ticket_type = ?");
+    $tt_stmt->execute([$ticket_type]);
+    $tt = $tt_stmt->fetch();
+    $price = $tt ? (float)$tt['price'] : 0;
+
     // Generate unique ticket code
     $ticket_code = 'TKT-' . strtoupper(substr(uniqid(), -8));
     
-    $stmt = $pdo->prepare("INSERT INTO tickets (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, price, visit_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed')");
-    $stmt->execute([$ticket_code, $visitor_name, $visitor_email, $visitor_phone, $ticket_type, $price, $visit_date]);
+    $stmt = $pdo->prepare("INSERT INTO tickets (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, visit_date, status) VALUES (?, ?, ?, ?, ?, ?, 'confirmed')");
+    $stmt->execute([$ticket_code, $visitor_name, $visitor_email, $visitor_phone, $ticket_type, $visit_date]);
     
     header('Location: tickets.php?success=saved');
     exit();
@@ -50,7 +55,7 @@ include 'includes/header.php';
             
             <div class="form-group">
                 <label for="ticket_type">Ticket Type *</label>
-                <select id="ticket_type" name="ticket_type" required onchange="updatePrice()">
+                <select id="ticket_type" name="ticket_type" required>
                     <option value="adult">Adult</option>
                     <option value="child">Child</option>
                     <option value="senior">Senior</option>
@@ -61,11 +66,6 @@ include 'includes/header.php';
         </div>
         
         <div class="form-row">
-            <div class="form-group">
-                <label for="price">Price ($) *</label>
-                <input type="number" id="price" name="price" step="0.01" required value="15.00">
-            </div>
-            
             <div class="form-group">
                 <label for="visit_date">Visit Date *</label>
                 <input type="date" id="visit_date" name="visit_date" required min="<?php echo date('Y-m-d'); ?>">
@@ -78,22 +78,5 @@ include 'includes/header.php';
         </div>
     </form>
 </div>
-
-<script>
-function updatePrice() {
-    const type = document.getElementById('ticket_type').value;
-    const priceInput = document.getElementById('price');
-    
-    const prices = {
-        'adult': 15.00,
-        'child': 8.00,
-        'senior': 10.00,
-        'student': 12.00,
-        'group': 40.00
-    };
-    
-    priceInput.value = prices[type];
-}
-</script>
 
 <?php include 'includes/footer.php'; ?>

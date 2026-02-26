@@ -61,6 +61,12 @@ CREATE TABLE IF NOT EXISTS artworks (
     FOREIGN KEY (location_id) REFERENCES locations(location_id) ON DELETE SET NULL
 );
 
+-- Ticket Types Table (prices kept here, not in tickets, to satisfy 3NF)
+CREATE TABLE IF NOT EXISTS ticket_types (
+    ticket_type VARCHAR(20) PRIMARY KEY,
+    price DECIMAL(10,2) NOT NULL
+);
+
 -- Tickets Table
 CREATE TABLE IF NOT EXISTS tickets (
     ticket_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,15 +74,15 @@ CREATE TABLE IF NOT EXISTS tickets (
     visitor_name VARCHAR(100) NOT NULL,
     visitor_email VARCHAR(100),
     visitor_phone VARCHAR(20),
-    ticket_type ENUM('adult', 'child', 'senior', 'student', 'group') NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    ticket_type VARCHAR(20) NOT NULL,
     visit_date DATE NOT NULL,
     qr_code VARCHAR(255),
     purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'confirmed', 'used', 'cancelled') DEFAULT 'confirmed',
     scanned_at TIMESTAMP NULL,
     scanned_by INT,
-    FOREIGN KEY (scanned_by) REFERENCES admin_users(admin_id)
+    FOREIGN KEY (scanned_by) REFERENCES admin_users(admin_id),
+    FOREIGN KEY (ticket_type) REFERENCES ticket_types(ticket_type)
 );
 
 -- Tour Guides Table
@@ -100,7 +106,6 @@ CREATE TABLE IF NOT EXISTS tours (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     max_capacity INT NOT NULL,
-    current_bookings INT DEFAULT 0,
     price DECIMAL(10,2),
     status ENUM('scheduled', 'ongoing', 'completed', 'cancelled') DEFAULT 'scheduled',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -144,6 +149,14 @@ INSERT INTO exhibit_classifications (name, description) VALUES
 ('Cultural Heritage', 'Cultural artifacts and traditional items'),
 ('Science & Technology', 'Scientific instruments and technological innovations');
 
+-- Insert ticket type pricing
+INSERT INTO ticket_types (ticket_type, price) VALUES
+('adult', 500.00),
+('child', 400.00),
+('senior', 350.00),
+('student', 350.00),
+('group', 400.00);
+
 -- Insert sample locations
 INSERT INTO locations (name, floor, capacity, description) VALUES
 ('Main Gallery', '1st Floor', 100, 'Primary exhibition space'),
@@ -151,5 +164,9 @@ INSERT INTO locations (name, floor, capacity, description) VALUES
 ('West Wing', '2nd Floor', 75, 'Rotating exhibitions'),
 ('Special Collections', '2nd Floor', 30, 'Premium exhibits'),
 ('Sculpture Garden', 'Ground Floor', 150, 'Outdoor sculpture display');
+
+-- Insert sample artworks
+INSERT INTO artworks (title, artist, type, description, year_created, location_id, condition_status, image_path) VALUES
+('Spoliarium', 'Juan Luau', 'painting', 'A masterful painting depicting scenes of ancient Rome, showcasing the artist\'s exceptional skill in capturing human emotion and historical narrative.', '1884', 1, 'excellent', 'img/Spoliarium.jpg');
 
 

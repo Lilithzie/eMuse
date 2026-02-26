@@ -12,7 +12,8 @@ if (isset($_GET['delete'])) {
 
 // Get all tours
 $tours = $pdo->query("
-    SELECT t.*, g.full_name as guide_name 
+    SELECT t.*, g.full_name as guide_name,
+           (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings
     FROM tours t 
     LEFT JOIN tour_guides g ON t.guide_id = g.guide_id 
     ORDER BY t.tour_date DESC, t.start_time ASC

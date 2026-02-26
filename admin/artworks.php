@@ -5,7 +5,20 @@ checkAuth();
 // Handle delete
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
+    
+    // Get the image path before deleting
+    $stmt = $pdo->prepare("SELECT image_path FROM artworks WHERE artwork_id = ?");
+    $stmt->execute([$id]);
+    $artwork_to_delete = $stmt->fetch();
+    
+    // Delete the artwork from database
     $pdo->prepare("DELETE FROM artworks WHERE artwork_id = ?")->execute([$id]);
+    
+    // Delete the image file if it exists
+    if ($artwork_to_delete && !empty($artwork_to_delete['image_path']) && file_exists('../' . $artwork_to_delete['image_path'])) {
+        unlink('../' . $artwork_to_delete['image_path']);
+    }
+    
     header('Location: artworks.php?success=deleted');
     exit();
 }
@@ -47,6 +60,7 @@ include 'includes/header.php';
         <table class="data-table">
             <thead>
                 <tr>
+                    <th>Photo</th>
                     <th>ID</th>
                     <th>Title</th>
                     <th>Artist</th>
@@ -60,6 +74,14 @@ include 'includes/header.php';
             <tbody>
                 <?php foreach ($artworks as $artwork): ?>
                 <tr>
+                    <td>
+                        <?php if (!empty($artwork['image_path'])): ?>
+                            <img src="../<?php echo $artwork['image_path']; ?>" alt="<?php echo htmlspecialchars($artwork['title']); ?>" 
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                        <?php else: ?>
+                            <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">No Image</div>
+                        <?php endif; ?>
+                    </td>
                     <td><?php echo $artwork['artwork_id']; ?></td>
                     <td><?php echo $artwork['title']; ?></td>
                     <td><?php echo $artwork['artist']; ?></td>

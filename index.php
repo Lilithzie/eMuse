@@ -124,10 +124,10 @@ include 'includes/user-header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, a.description
+                                             l.name as location, a.description, a.image_path
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
-                                             ORDER BY a.artwork_id DESC
+                                             ORDER BY a.artwork_id
                                              LIMIT 6");
                         $stmt->execute();
                         $artworks = $stmt->fetchAll();
@@ -137,12 +137,20 @@ include 'includes/user-header.php';
                                 ?>
                                 <div class="product-item">
                                     <div class="card shadow-sm product-card">
-                                        <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                            <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
-                                                <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
-                                                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
+                                        <?php if (!empty($artwork['image_path'])): ?>
+                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
+                                                <img src="<?php echo htmlspecialchars($artwork['image_path']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                                     style="width: 100%; height: 200px; object-fit: cover;">
                                             </div>
-                                        </div>
+                                        <?php else: ?>
+                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                                                <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
+                                                    <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
+                                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
                                         
                                         <div class="card-body">
                                             <h5 class="card-title product-name"><?php echo htmlspecialchars($artwork['title']); ?></h5>
@@ -183,7 +191,8 @@ include 'includes/user-header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT t.tour_id, t.title, t.description, t.tour_date, 
-                                             t.start_time, t.end_time, t.max_capacity, t.current_bookings, 
+                                             t.start_time, t.end_time, t.max_capacity,
+                                             (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings,
                                              t.price, tg.full_name as guide_name
                                              FROM tours t
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
@@ -211,7 +220,7 @@ include 'includes/user-header.php';
                                             <h5 class="card-title product-name"><?php echo htmlspecialchars($tour['title']); ?></h5>
                                             <p class="product-scent">Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?></p>
                                             <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Price:</strong> $<?php echo number_format($tour['price'] ?? 0, 2); ?>
+                                                <strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?>
                                             </p>
                                             
                                             <!-- Capacity Bar -->
