@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 // User Side Header
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -39,8 +38,3 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </ul>
         </div>
     </nav>
-</body>
-</html>
-=======
-<?php include __DIR__ . "/../user/includes/header.php"; ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3

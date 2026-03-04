@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo SITE_NAME; ?></title>
-<<<<<<< HEAD
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo filemtime('../assets/css/style.css'); ?>">
-=======
-    <link rel="stylesheet" href="../assets/css/style.css">
     <style id="scroll-cloak">.main-content,.sidebar{opacity:0}</style>
     <script>
     // Remove cloak quickly: if no saved scroll, reveal immediately;
@@ -16,7 +13,6 @@
         document.getElementById('scroll-cloak').remove();
     }
     </script>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
 </head>
 <body>
     <div class="admin-layout">

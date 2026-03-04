@@ -46,11 +46,12 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
         </div>
 
         <!-- Artworks Grid -->
-        <div class="cards-grid">
+        <div class="products-grid">
             <?php
             try {
-                $query = "SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                 a.description, a.condition_status, l.name as location, l.floor,
+                $query = "SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created,
+                                 a.description, a.condition_status, a.image_path, a.exhibit_id,
+                                 l.name as location, l.floor,
                                  e.title as exhibit_title
                           FROM artworks a 
                           LEFT JOIN locations l ON a.location_id = l.location_id
@@ -85,49 +86,44 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 
                 if ($artworks) {
                     foreach ($artworks as $artwork) {
-                        $type_label = ucfirst($artwork['type']);
                         ?>
-                        <div class="card">
-                            <div class="card-header">
-                                <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
-                                <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
-                                    by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
-                                </p>
-                            </div>
-                            <div class="card-body">
-                                <p><?php echo htmlspecialchars($artwork['description'] ?? 'No description available'); ?></p>
-                                
-                                <!-- Type and Year Badges -->
-                                <div style="margin-top: 1rem; margin-bottom: 1rem;">
-                                    <span class="location-badge"><?php echo htmlspecialchars($type_label); ?></span>
-                                    <span class="location-badge"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></span>
-                                </div>
-
-                                <!-- Location Info -->
-                                <p class="text-muted">
-                                    <strong>Location:</strong><br>
-                                    <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
-                                    <?php if ($artwork['floor']): echo ' - ' . htmlspecialchars($artwork['floor']); endif; ?>
-                                </p>
-
-                                <!-- Condition Status -->
-                                <p class="text-muted" style="margin-top: 0.5rem;">
-                                    <strong>Condition:</strong> 
-                                    <span class="condition-<?php echo $artwork['condition_status']; ?>">
-                                        <?php echo ucfirst($artwork['condition_status']); ?>
-                                    </span>
-                                </p>
-
-                                <!-- Exhibit Info -->
-                                <?php if ($artwork['exhibit_title']): ?>
-                                <p class="text-muted" style="margin-top: 0.5rem;">
-                                    <strong>On Display:</strong> 
-                                    <a href="exhibits.php?id=<?php echo htmlspecialchars($artwork['exhibit_id']); ?>" 
-                                       style="color: var(--primary-light); text-decoration: none;">
-                                        <?php echo htmlspecialchars($artwork['exhibit_title']); ?>
-                                    </a>
-                                </p>
+                        <div class="product-item">
+                            <div class="card shadow-sm product-card">
+                                <?php if (!empty($artwork['image_path'])): ?>
+                                    <div style="overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
+                                        <img src="../<?php echo htmlspecialchars($artwork['image_path']); ?>"
+                                             alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                             style="width: 100%; height: 200px; object-fit: cover;">
+                                    </div>
+                                <?php else: ?>
+                                    <div style="overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
+                                            <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars(ucfirst($artwork['type'])); ?></h4>
+                                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
+
+                                <div class="card-body">
+                                    <h5 class="card-title product-name"><?php echo htmlspecialchars($artwork['title']); ?></h5>
+                                    <p class="product-scent"><?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?></p>
+                                    <p style="font-size: 0.9rem; margin-bottom: 0.3rem;">
+                                        <strong>Location:</strong> <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
+                                        <?php if (!empty($artwork['floor'])): ?> &mdash; <?php echo htmlspecialchars($artwork['floor']); ?><?php endif; ?>
+                                    </p>
+                                    <?php if (!empty($artwork['exhibit_title'])): ?>
+                                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.3rem;">
+                                        <strong>On Display:</strong>
+                                        <a href="exhibits.php?id=<?php echo $artwork['exhibit_id']; ?>" style="color: var(--primary-light); text-decoration: none;">
+                                            <?php echo htmlspecialchars($artwork['exhibit_title']); ?>
+                                        </a>
+                                    </p>
+                                    <?php endif; ?>
+
+                                    <div class="product-actions" style="margin-top: 1rem;">
+                                        <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%;">View Details</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 require 'config/database.php';
 include 'includes/user-header.php';
@@ -210,6 +209,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     </div>
 
 <?php include 'includes/user-footer.php'; ?>
-=======
-<?php header("Location: user/tickets.php"); exit(); ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3

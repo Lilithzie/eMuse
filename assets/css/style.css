@@ -1682,12 +1682,6 @@ form {
         letter-spacing: 0.3px;
     }
     
-    .nav-logo a {
-        font-size: 1.35rem;
-    }
-}
-
-<<<<<<< HEAD
 /* Artwork Image Styles */
 .card-image {
     position: relative;
@@ -1743,7 +1737,7 @@ input[type="file"]:focus {
     outline: none;
     border-color: var(--btn-bg);
 }
-=======
+
 /* ========================================
    USER PAGE COMPONENT STYLES
    ======================================== */
@@ -2017,5 +2011,3 @@ input[type="file"]:focus {
         font-size: 1.6rem;
     }
 }
-
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3

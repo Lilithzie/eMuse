@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 require 'config/database.php';
 include 'includes/user-header.php';
@@ -241,6 +240,3 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
     </div>
 
 <?php include 'includes/user-footer.php'; ?>
-=======
-<?php header("Location: user/tours.php"); exit(); ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3

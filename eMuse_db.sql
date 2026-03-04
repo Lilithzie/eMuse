@@ -95,14 +95,10 @@ CREATE TABLE IF NOT EXISTS tickets (
     status ENUM('pending', 'confirmed', 'used', 'cancelled') DEFAULT 'confirmed',
     scanned_at TIMESTAMP NULL,
     scanned_by INT,
-<<<<<<< HEAD
-    FOREIGN KEY (scanned_by) REFERENCES admin_users(admin_id),
-    FOREIGN KEY (ticket_type) REFERENCES ticket_types(ticket_type)
-=======
     user_id INT NULL,
     FOREIGN KEY (scanned_by) REFERENCES admin_users(admin_id),
+    FOREIGN KEY (ticket_type) REFERENCES ticket_types(ticket_type),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
 );
 
 -- Tour Guides Table
@@ -191,12 +187,28 @@ INSERT INTO locations (name, floor, capacity, description) VALUES
 ('Special Collections', '2nd Floor', 30, 'Premium exhibits'),
 ('Sculpture Garden', 'Ground Floor', 150, 'Outdoor sculpture display');
 
-<<<<<<< HEAD
 -- Insert sample artworks
 INSERT INTO artworks (title, artist, type, description, year_created, location_id, condition_status, image_path) VALUES
-('Spoliarium', 'Juan Luau', 'painting', 'A masterful painting depicting scenes of ancient Rome, showcasing the artist\'s exceptional skill in capturing human emotion and historical narrative.', '1884', 1, 'excellent', 'img/Spoliarium.jpg');
+('Spoliarium', 'Juan Luna', 'painting', 'A monumental painting depicting scenes of ancient Rome, showcasing the artist\'s exceptional skill in capturing human emotion and historical narrative. It won the gold medal at the 1884 Exposición Nacional de Bellas Artes in Madrid.', '1884', 1, 'excellent', 'img/Spoliarium.jpg'),
+('The Parisian Life', 'Juan Luna', 'painting', 'A vibrant portrayal of Parisian social life, reflecting the cosmopolitan world that Juan Luna inhabited during his years in Europe.', '1892', 1, 'excellent', 'img/artwork_1772097226_69a00ecaecb12.jpg'),
+('The Blood Compact', 'Juan Luna', 'painting', 'Depicts the blood compact ritual between Sikatuna and Spanish explorer Miguel López de Legazpi, symbolizing the bond between the Filipino and Spanish peoples.', '1886', 1, 'good', 'img/artwork_1772097237_69a00ed5c3384.jpg'),
+('Tampuhan', 'Juan Luna', 'painting', 'A tender domestic scene capturing a quarrel between lovers, set in a lush tropical environment. It is one of Luna\'s most beloved genre paintings.', '1895', 1, 'excellent', 'img/artwork_1772097249_69a00ee167b04.jpg'),
+('Planting Rice', 'Fernando Amorsolo', 'painting', 'A masterpiece of Philippine rural life showing farmers planting rice under golden sunlight. Amorsolo\'s signature use of backlighting gives the scene a luminous, idyllic quality.', '1951', 1, 'excellent', 'img/artwork_1772097259_69a00eeba3fdd.jpg'),
+('Afternoon Meal of the Workers', 'Fernando Amorsolo', 'painting', 'Depicts Filipino farm workers sharing a simple midday meal, bathed in warm afternoon light. A celebration of everyday life and communal spirit.', '1938', 2, 'good', 'img/artwork_1772097280_69a00f00e0e22.jpg'),
+('Dalagang Bukid', 'Fernando Amorsolo', 'painting', 'A portrait of a young Filipino woman in traditional Barong dress, surrounded by tropical foliage. One of Amorsolo\'s most iconic representations of Filipino femininity.', '1942', 2, 'excellent', 'img/artwork_1772097293_69a00f0d97c83.jpg'),
+('The Fruit Gatherers', 'Fernando Amorsolo', 'painting', 'Young women picking tropical fruit in a sun-drenched orchard. The painting highlights Amorsolo\'s mastery of light and his enduring affection for rural Philippine scenery.', '1955', 2, 'good', 'img/artwork_1772097305_69a00f192bad0.png'),
+('Under the Mango Tree', 'Fernando Amorsolo', 'painting', 'A serene pastoral scene showing a family resting beneath the shade of a large mango tree. Evokes the gentle pace of Filipino provincial life.', '1949', 2, 'excellent', 'img/artwork_1772097318_69a00f2669295.jpg'),
+('The Builders', 'Fernando Amorsolo', 'painting', 'Depicts laborers at work constructing a building, capturing the dignity and strength of the Filipino working class in post-war Manila.', '1948', 3, 'good', 'img/artwork_1772097335_69a00f3783264.jpg'),
+('España y Filipinas', 'Juan Luna', 'painting', 'An allegorical work portraying the relationship between Spain and the Philippines as two women, symbolizing the colonial bond in a neoclassical style.', '1884', 1, 'fair', 'img/artwork_1772097347_69a00f43e0973.png'),
+('La Bulaqueña', 'Fernando Amorsolo', 'painting', 'A celebrated portrait of a woman from Bulacan province wearing a traditional pañuelo and saya. Considered one of the finest examples of Amorsolo\'s figure painting.', '1943', 3, 'excellent', 'img/artwork_1772097357_69a00f4d63577.jpg'),
+('The Mestiza', 'Fernando Amorsolo', 'painting', 'Portrays a mestiza woman in traditional finery, celebrating the blend of indigenous and Spanish heritage in Philippine culture and identity.', '1944', 3, 'good', 'img/artwork_1772097370_69a00f5a52a78.jpg'),
+('Hymen O Hymenae!', 'Juan Luna', 'painting', 'A mythological scene depicting a wedding procession in ancient Greece or Rome, showcasing Luna\'s academic training and command of large-scale figurative composition.', '1885', 4, 'good', 'img/artwork_1772097389_69a00f6d82c6e.jpg'),
+('Los Indios Bravos', 'Juan Luna', 'painting', 'A dynamic painting depicting indigenous warriors, reflecting Luna\'s growing nationalist sentiment during his time in Europe.', '1898', 4, 'fair', 'img/artwork_1772097401_69a00f79a1e0e.jpg'),
+('Woman with a Fan', 'Fernando Amorsolo', 'painting', 'A graceful portrait of a Filipino woman elegantly holding a hand fan, painted with Amorsolo\'s characteristic warm palette and attention to fabric and texture.', '1952', 4, 'excellent', 'img/artwork_1772097412_69a00f8462ec5.jpg'),
+('El Ciego', 'Juan Luna', 'painting', 'A poignant portrayal of a blind beggar, demonstrating Luna\'s empathy for the marginalized and his skill in rendering human suffering with dignity.', '1887', 4, 'good', 'img/artwork_1772097426_69a00f9228f71.jpg'),
+('Fisherman at Sunset', 'Fernando Amorsolo', 'painting', 'A fisherman silhouetted against a blazing Philippine sunset, casting his net into the sea. Showcases Amorsolo\'s extraordinary ability to paint light and reflection on water.', '1950', 5, 'good', 'img/artwork_1772097481_69a00fc918a00.jpg'),
+('Filipino Family', 'Fernando Amorsolo', 'painting', 'A warm and tender depiction of a Filipino family gathered together in a rural home, symbolizing unity, love, and the central importance of family in Philippine culture.', '1946', 5, 'excellent', 'img/artwork_1772097512_69a00fe839921.jpg');
 
-=======
 -- ========================================
 -- ADDITIONAL FEATURES (Added Feb 2026)
 -- ========================================
@@ -452,5 +464,4 @@ INSERT INTO feedback_categories (name, description) VALUES
 ('Staff Service', 'Comments about staff and service quality'),
 ('Facilities', 'Feedback about facilities and amenities'),
 ('Suggestions', 'Improvement suggestions and ideas');
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
 
