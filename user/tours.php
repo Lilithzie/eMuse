@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 <?php
-require 'config/database.php';
-include 'includes/user-header.php';
+require '../config/database.php';
+include 'includes/header.php';
 
 $message = '';
 $message_type = '';
@@ -18,9 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $message = 'Please fill in all fields correctly.';
             $message_type = 'error';
         } else {
-            // Check availability (current_bookings derived from tour_bookings, not stored)
-            $check_stmt = $pdo->prepare("SELECT t.max_capacity, t.title,
-                                        (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings
+            // Check availability
+            $check_stmt = $pdo->prepare("SELECT t.max_capacity, t.current_bookings, t.title 
                                         FROM tours t WHERE tour_id = ?");
             $check_stmt->execute([$tour_id]);
             $tour_info = $check_stmt->fetch();
@@ -36,6 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $book_stmt = $pdo->prepare("INSERT INTO tour_bookings (tour_id, visitor_name, visitor_email, number_of_people) 
                                           VALUES (?, ?, ?, ?)");
                 $book_stmt->execute([$tour_id, $visitor_name, $visitor_email, $num_people]);
+
+                // Update current bookings
+                $update_stmt = $pdo->prepare("UPDATE tours SET current_bookings = current_bookings + ? WHERE tour_id = ?");
+                $update_stmt->execute([$num_people, $tour_id]);
 
                 $message = 'Tour booked successfully! Confirmation has been sent to ' . htmlspecialchars($visitor_email) . '.';
                 $message_type = 'success';
@@ -88,8 +90,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             <?php
             try {
                 $query = "SELECT t.tour_id, t.title, t.description, t.tour_date, 
-                                 t.start_time, t.end_time, t.max_capacity,
-                                 (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings,
+                                 t.start_time, t.end_time, t.max_capacity, t.current_bookings, 
                                  t.price, t.status, tg.full_name as guide_name
                           FROM tours t
                           LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
@@ -141,7 +142,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                                         <strong>⏰ Time:</strong> <?php echo date('g:i A', strtotime($tour['start_time'])); ?> - <?php echo date('g:i A', strtotime($tour['end_time'])); ?>
                                     </p>
                                     <p class="text-muted" style="margin-bottom: 0.5rem;">
-                                        <strong>💰 Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?> per person
+                                        <strong>💰 Price:</strong> $<?php echo number_format($tour['price'] ?? 0, 2); ?> per person
                                     </p>
                                 </div>
 
@@ -240,7 +241,4 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
         </section>
     </div>
 
-<?php include 'includes/user-footer.php'; ?>
-=======
-<?php header("Location: user/tours.php"); exit(); ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
+<?php include 'includes/footer.php'; ?>

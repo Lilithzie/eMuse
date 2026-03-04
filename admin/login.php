@@ -1,28 +1,9 @@
 <?php
-require_once '../config/config.php';
-
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = sanitize($_POST['username']);
-    $password = $_POST['password'];
-    
-    $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? AND role IN ('super_admin', 'admin', 'staff')");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-    
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id'] = $user['admin_id'];
-        $_SESSION['admin_name'] = $user['full_name'];
-        $_SESSION['admin_role'] = $user['role'];
-        header('Location: index.php');
-        exit();
-    } else {
-        $error = 'Invalid username or password';
-    }
-}
+// Redirect to unified login page
+header('Location: ../login.php');
+exit();
 ?>
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,3 +45,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </body>
 </html>
+=======
+>>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3

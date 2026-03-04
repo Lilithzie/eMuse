@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 <?php
-require 'config/database.php';
-include 'includes/user-header.php';
+require '../config/database.php';
+include 'includes/header.php';
 ?>
 
     <!-- Hero Section -->
@@ -10,14 +9,14 @@ include 'includes/user-header.php';
             <div>
                 <h1>Welcome to eMuse</h1>
                 <h3> ______________________________________________________</h3>
-                <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you’re visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
+                <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you're visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
                 <div class="hero-cta">
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
                     <a href="tickets.php" class="btn btn-outline-primary btn-lg">Book Your Visit</a>
                 </div>
             </div>
             <div class="hero-media">
-                <img src="img/hero.jpg" alt="eMuse Museum Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--card-radius);">
+                <img src="../img/hero.jpg" alt="eMuse Museum Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--card-radius);">
             </div>
         </div>
     </section>
@@ -125,10 +124,10 @@ include 'includes/user-header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, a.description, a.image_path
+                                             l.name as location, a.description
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
-                                             ORDER BY a.artwork_id
+                                             ORDER BY a.artwork_id DESC
                                              LIMIT 6");
                         $stmt->execute();
                         $artworks = $stmt->fetchAll();
@@ -138,20 +137,12 @@ include 'includes/user-header.php';
                                 ?>
                                 <div class="product-item">
                                     <div class="card shadow-sm product-card">
-                                        <?php if (!empty($artwork['image_path'])): ?>
-                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
-                                                <img src="<?php echo htmlspecialchars($artwork['image_path']); ?>" 
-                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>"
-                                                     style="width: 100%; height: 200px; object-fit: cover;">
+                                        <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                                            <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
+                                                <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
+                                                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
                                             </div>
-                                        <?php else: ?>
-                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                                <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
-                                                    <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
-                                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
+                                        </div>
                                         
                                         <div class="card-body">
                                             <h5 class="card-title product-name"><?php echo htmlspecialchars($artwork['title']); ?></h5>
@@ -192,8 +183,7 @@ include 'includes/user-header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT t.tour_id, t.title, t.description, t.tour_date, 
-                                             t.start_time, t.end_time, t.max_capacity,
-                                             (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings,
+                                             t.start_time, t.end_time, t.max_capacity, t.current_bookings, 
                                              t.price, tg.full_name as guide_name
                                              FROM tours t
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
@@ -221,7 +211,7 @@ include 'includes/user-header.php';
                                             <h5 class="card-title product-name"><?php echo htmlspecialchars($tour['title']); ?></h5>
                                             <p class="product-scent">Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?></p>
                                             <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?>
+                                                <strong>Price:</strong> $<?php echo number_format($tour['price'] ?? 0, 2); ?>
                                             </p>
                                             
                                             <!-- Capacity Bar -->
@@ -260,8 +250,8 @@ include 'includes/user-header.php';
         <!-- Call to Action -->
         <section class="section">
             <div class="info-box" style="text-align: center; padding: 3rem 2rem;">
-                <h3 style="font-size: 1.8rem;  margin-bottom: 1rem;">Ready for Your Museum Experience?</h3>
-                <p style="font-size: 1.1rem;  margin-bottom: 2rem;">Plan your visit today and discover the wonders that await you.</p>
+                <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Ready for Your Museum Experience?</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 2rem;">Plan your visit today and discover the wonders that await you.</p>
                 <div class="hero-buttons" style="justify-content: center;">
                     <a href="tickets.php" class="btn btn-primary">Purchase Tickets</a>
                     <a href="tours.php" class="btn btn-secondary">Schedule a Guided Tour</a>
@@ -270,7 +260,4 @@ include 'includes/user-header.php';
         </section>
     </div>
 
-<?php include 'includes/user-footer.php'; ?>
-=======
-<?php header("Location: user/index.php"); exit(); ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
+<?php include 'includes/footer.php'; ?>

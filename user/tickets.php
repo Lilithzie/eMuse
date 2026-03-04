@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 <?php
-require 'config/database.php';
-include 'includes/user-header.php';
+require '../config/database.php';
+include 'includes/header.php';
 
 $message = '';
 $message_type = '';
@@ -20,11 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $message = 'Please fill in all required fields.';
             $message_type = 'error';
         } else {
-            // Get ticket price from ticket_types table
-            $tt_stmt = $pdo->prepare("SELECT price FROM ticket_types WHERE ticket_type = ?");
-            $tt_stmt->execute([$ticket_type]);
-            $tt = $tt_stmt->fetch();
-            $price = $tt ? (float)$tt['price'] : 0;
+            // Get ticket price based on type
+            $price_map = [
+                'adult' => 500.00,
+                'child' => 400.00,
+                'senior' => 350.00,
+                'student' => 350.00,
+                'group' => 400.00
+            ];
+
+            $price = $price_map[$ticket_type] ?? 500.00;
             $total_price = $price * $quantity;
 
             // Create tickets
@@ -32,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $ticket_code = strtoupper('TK' . date('YmdHis') . rand(1000, 9999));
                 
                 $insert_stmt = $pdo->prepare("INSERT INTO tickets 
-                    (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, visit_date, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, 'confirmed')");
+                    (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, price, visit_date, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed')");
                 
                 $insert_stmt->execute([
                     $ticket_code,
@@ -41,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     $visitor_email,
                     $visitor_phone,
                     $ticket_type,
+                    $price,
                     $visit_date
                 ]);
             }
@@ -125,11 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         <label for="ticket_type">Ticket Type *</label>
                         <select id="ticket_type" name="ticket_type" required>
                             <option value="">-- Select Ticket Type --</option>
-                            <option value=\"adult\">Adult (PHP 500.00)</option>
-                            <option value=\"child\">Child (PHP 400.00)</option>
-                            <option value=\"senior\">Senior (PHP 350.00)</option>
-                            <option value=\"student\">Student (PHP 350.00)</option>
-                            <option value=\"group\">Group Rate (PHP 400.00/person)</option>
+                            <option value="adult">Adult (PHP 500.00)</option>
+                            <option value="child">Child (PHP 400.00)</option>
+                            <option value="senior">Senior (PHP 350.00)</option>
+                            <option value="student">Student (PHP 350.00)</option>
+                            <option value="group">Group Rate (PHP 400.00/person)</option>
                         </select>
                     </div>
 
@@ -183,7 +188,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                 <?php
                 try {
-                    // Show some statistics
                     $stats_stmt = $pdo->prepare("SELECT visit_date, COUNT(*) as tickets_sold 
                                                FROM tickets 
                                                WHERE visit_date >= CURDATE()
@@ -209,7 +213,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         </section>
     </div>
 
-<?php include 'includes/user-footer.php'; ?>
-=======
-<?php header("Location: user/tickets.php"); exit(); ?>
->>>>>>> 227cdbef3fd5b34a25dc85e64c4139853c9371e3
+<?php include 'includes/footer.php'; ?>
