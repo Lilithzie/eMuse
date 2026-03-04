@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo SITE_NAME; ?></title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style id="scroll-cloak">.main-content,.sidebar{opacity:0}</style>
+    <script>
+    // Remove cloak quickly: if no saved scroll, reveal immediately;
+    // otherwise the restore script in footer will reveal after positioning.
+    if(!sessionStorage.getItem('adminScrollY')&&!sessionStorage.getItem('sidebarScrollY')){
+        document.getElementById('scroll-cloak').remove();
+    }
+    </script>
 </head>
 <body>
     <div class="admin-layout">

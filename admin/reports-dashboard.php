@@ -185,7 +185,7 @@ include 'includes/header.php';
                 </div>
                 <div class="pie-chart-item">
                     <div class="pie-label">Senior</div>
-                    <div class="pie-bar" style="background: #ff9800; width: <?php echo $total_tickets > 0 ? (($tickets['senior'] ?? 0) / $total_tickets * 100) : 0; %>%">
+                    <div class="pie-bar" style="background: #ff9800; width: <?php echo $total_tickets > 0 ? (($tickets['senior'] ?? 0) / $total_tickets * 100) : 0; ?>%">
                         <?php echo $tickets['senior'] ?? 0; ?>
                     </div>
                 </div>

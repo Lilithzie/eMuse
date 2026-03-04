@@ -1,7 +1,75 @@
 // eMuse Museum Management System - Main JavaScript
 
+// Prevent browser's own scroll restoration from interfering
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+// Restore scroll positions (main content + sidebar) after page reload
+(function() {
+    // Helper: remove the opacity cloak added in <head>
+    function revealPage() {
+        var cloak = document.getElementById('scroll-cloak');
+        if (cloak) cloak.remove();
+    }
+
+    // --- Main content scroll ---
+    var savedScrollY = sessionStorage.getItem('adminScrollY');
+    if (savedScrollY !== null) {
+        sessionStorage.removeItem('adminScrollY');
+        var target = parseInt(savedScrollY, 10);
+        window.scrollTo(0, target);           // immediate (script is in footer, DOM ready)
+    }
+
+    // --- Sidebar scroll ---
+    var savedSidebarY = sessionStorage.getItem('sidebarScrollY');
+    var sidebar = document.querySelector('.sidebar');
+    if (savedSidebarY !== null && sidebar) {
+        sessionStorage.removeItem('sidebarScrollY');
+        sidebar.scrollTop = parseInt(savedSidebarY, 10);
+    } else if (sidebar) {
+        // Even without a saved position, scroll the active item into view
+        var activeItem = sidebar.querySelector('.nav-item.active');
+        if (activeItem) {
+            activeItem.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }
+    }
+
+    // Reveal after scroll is set — single rAF so the browser paints at the right offset
+    requestAnimationFrame(revealPage);
+})();
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    var sidebar = document.querySelector('.sidebar');
+
+    // Helper: save both scroll positions
+    function saveScrollPositions() {
+        sessionStorage.setItem('adminScrollY', window.scrollY);
+        if (sidebar) {
+            sessionStorage.setItem('sidebarScrollY', sidebar.scrollTop);
+        }
+    }
+
+    // Save scroll position before same-page action links reload the page (?delete=, ?acknowledge=, etc.)
+    document.querySelectorAll('a[href^="?"]').forEach(function(link) {
+        link.addEventListener('click', saveScrollPositions);
+    });
+
+    // Save sidebar scroll on ANY sidebar nav click (page navigation)
+    if (sidebar) {
+        sidebar.querySelectorAll('a.nav-item').forEach(function(link) {
+            link.addEventListener('click', function() {
+                sessionStorage.setItem('sidebarScrollY', sidebar.scrollTop);
+            });
+        });
+    }
+
+    // Save scroll position on form submissions that reload the same page
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', saveScrollPositions);
+    });
+
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {

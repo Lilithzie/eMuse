@@ -138,7 +138,7 @@ include 'includes/header.php';
             <div class="breakdown-item">
                 <div class="breakdown-label">Other Revenue</div>
                 <div class="breakdown-bar">
-                    <div class="breakdown-fill" style="width: <?php echo $total_revenue > 0 ? ($other_revenue / $total_revenue * 100) : 0; %>%; background: #4caf50;"></div>
+                    <div class="breakdown-fill" style="width: <?php echo $total_revenue > 0 ? ($other_revenue / $total_revenue * 100) : 0; ?>%; background: #4caf50;"></div>
                 </div>
                 <div class="breakdown-amount"><?php echo formatCurrency($other_revenue); ?></div>
             </div>
