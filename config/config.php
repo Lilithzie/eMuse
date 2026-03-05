@@ -14,12 +14,69 @@ date_default_timezone_set('UTC');
 // Include database connection
 require_once __DIR__ . '/database.php';
 
-// Authentication check function
+// Authentication check function - Admin / Super Admin only
 function checkAuth() {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ' . SITE_URL . '/admin/login.php');
+        header('Location: ' . SITE_URL . '/user/login.php');
         exit();
     }
+    // Only super_admin and admin can access the full admin panel
+    if (!in_array($_SESSION['admin_role'], ['super_admin', 'admin'])) {
+        redirectByRole($_SESSION['admin_role']);
+        exit();
+    }
+}
+
+// Auth check for any staff role
+function checkStaffAuth($required_role = null) {
+    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        header('Location: ' . SITE_URL . '/user/login.php');
+        exit();
+    }
+    if ($required_role !== null) {
+        $allowed = is_array($required_role) ? $required_role : [$required_role];
+        if (!in_array($_SESSION['admin_role'], $allowed)) {
+            redirectByRole($_SESSION['admin_role']);
+            exit();
+        }
+    }
+}
+
+// Redirect user to their correct portal based on role
+function redirectByRole($role) {
+    $url = SITE_URL;
+    switch ($role) {
+        case 'super_admin':
+        case 'admin':
+            header("Location: $url/admin/index.php"); break;
+        case 'ticketing_staff':
+            header("Location: $url/ticketing/index.php"); break;
+        case 'tour_guide':
+            header("Location: $url/tourguide/index.php"); break;
+        case 'maintenance_staff':
+            header("Location: $url/maintenance/index.php"); break;
+        case 'shop_staff':
+            header("Location: $url/shop/index.php"); break;
+        case 'manager':
+            header("Location: $url/manager/index.php"); break;
+        default:
+            header("Location: $url/user/index.php"); break;
+    }
+    exit();
+}
+
+// Get role display label
+function getRoleLabel($role) {
+    $labels = [
+        'super_admin'      => 'Super Admin',
+        'admin'            => 'Administrator',
+        'ticketing_staff'  => 'Ticketing Staff',
+        'tour_guide'       => 'Tour Guide',
+        'maintenance_staff'=> 'Maintenance Staff',
+        'shop_staff'       => 'Shop Staff',
+        'manager'          => 'Manager',
+    ];
+    return $labels[$role] ?? ucfirst(str_replace('_',' ',$role));
 }
 
 // Generate CSRF token

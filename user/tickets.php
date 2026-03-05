@@ -4,57 +4,71 @@ include 'includes/header.php';
 
 $message = '';
 $message_type = '';
+$receipt = null;
+
+// Active ticket-applicable promo codes
+$promoList = $pdo->query("SELECT * FROM promo_codes WHERE status='active' AND applicable_to IN ('tickets','all') AND (valid_until IS NULL OR valid_until >= CURDATE()) ORDER BY code")->fetchAll();
 
 // Handle ticket purchase
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'purchase_ticket') {
     try {
-        $visitor_name = trim($_POST['visitor_name']);
-        $visitor_email = trim($_POST['visitor_email']);
-        $visitor_phone = trim($_POST['visitor_phone']);
-        $ticket_type = trim($_POST['ticket_type']);
-        $visit_date = trim($_POST['visit_date']);
-        $quantity = intval($_POST['quantity']);
+        $visitor_name   = trim($_POST['visitor_name']);
+        $visitor_email  = trim($_POST['visitor_email']);
+        $visitor_phone  = trim($_POST['visitor_phone']);
+        $ticket_type    = trim($_POST['ticket_type']);
+        $visit_date     = trim($_POST['visit_date']);
+        $quantity       = intval($_POST['quantity']);
+        $payment_method = trim($_POST['payment_method'] ?? 'cash');
+        $promo_code_str = strtoupper(trim($_POST['promo_code'] ?? ''));
 
         if (empty($visitor_name) || empty($visitor_email) || empty($ticket_type) || empty($visit_date) || $quantity < 1) {
             $message = 'Please fill in all required fields.';
             $message_type = 'error';
         } else {
-            // Get ticket price based on type
-            $price_map = [
-                'adult' => 500.00,
-                'child' => 400.00,
-                'senior' => 350.00,
-                'student' => 350.00,
-                'group' => 400.00
-            ];
-
+            $price_map = ['adult'=>500.00,'child'=>400.00,'senior'=>350.00,'student'=>350.00,'group'=>400.00];
             $price = $price_map[$ticket_type] ?? 500.00;
-            $total_price = $price * $quantity;
+            $subtotal = $price * $quantity;
 
-            // Create tickets
-            for ($i = 0; $i < $quantity; $i++) {
-                $ticket_code = strtoupper('TK' . date('YmdHis') . rand(1000, 9999));
-                
-                $insert_stmt = $pdo->prepare("INSERT INTO tickets 
-                    (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, price, visit_date, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed')");
-                
-                $insert_stmt->execute([
-                    $ticket_code,
-                    $visitor_name,
-                    $visitor_email,
-                    $visitor_phone,
-                    $ticket_type,
-                    $price,
-                    $visit_date
-                ]);
+            // Validate promo code
+            $discountPer = 0;
+            $promoRecord = null;
+            if ($promo_code_str) {
+                $ps = $pdo->prepare("SELECT * FROM promo_codes WHERE code=? AND status='active' AND applicable_to IN ('tickets','all') AND (valid_until IS NULL OR valid_until >= CURDATE()) AND (max_uses IS NULL OR uses_count < max_uses)");
+                $ps->execute([$promo_code_str]); $promoRecord = $ps->fetch();
+                if (!$promoRecord) {
+                    $message = "Invalid or expired promo code: $promo_code_str";
+                    $message_type = 'error';
+                } else {
+                    $discountPer = $promoRecord['discount_type'] === 'percentage'
+                        ? $subtotal * ($promoRecord['discount_value']/100)
+                        : min($promoRecord['discount_value'], $subtotal);
+                }
             }
 
-            $message = 'Success! ' . $quantity . ' ticket(s) have been purchased. Total: PHP ' . number_format($total_price, 2) . '. Confirmation sent to ' . htmlspecialchars($visitor_email) . '.';
-            $message_type = 'success';
+            if (!$message) {
+                $discountEach = $quantity > 0 ? $discountPer / $quantity : 0;
+                $priceEach    = $price - $discountEach;
+                $amountPaid   = max(0, $subtotal - $discountPer);
+                $ticketCodes  = [];
+
+                for ($i = 0; $i < $quantity; $i++) {
+                    $ticket_code = strtoupper('TK' . date('YmdHis') . rand(1000,9999));
+                    $pdo->prepare("INSERT INTO tickets
+                        (ticket_code, visitor_name, visitor_email, visitor_phone, ticket_type, price, discount_amount, promo_code, amount_paid, payment_method, visit_date, status)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,'confirmed')")
+                        ->execute([$ticket_code,$visitor_name,$visitor_email,$visitor_phone,$ticket_type,$price,$discountEach,$promo_code_str?:null,$priceEach,$payment_method,$visit_date]);
+                    $ticketCodes[] = $ticket_code;
+                }
+
+                if ($promoRecord) $pdo->prepare("UPDATE promo_codes SET uses_count=uses_count+1 WHERE promo_id=?")->execute([$promoRecord['promo_id']]);
+
+                $receipt = ['codes'=>$ticketCodes,'type'=>$ticket_type,'qty'=>$quantity,'price'=>$price,'discount'=>$discountPer,'total'=>$amountPaid,'payment'=>$payment_method,'promo'=>$promo_code_str,'email'=>$visitor_email,'name'=>$visitor_name,'date'=>$visit_date];
+                $message = "Success! $quantity ticket(s) purchased. Total: ₱".number_format($amountPaid,2).". Codes emailed to ".htmlspecialchars($visitor_email).".";
+                $message_type = 'success';
+            }
         }
     } catch (Exception $e) {
-        $message = 'An error occurred while purchasing tickets: ' . $e->getMessage();
+        $message = 'An error occurred: ' . $e->getMessage();
         $message_type = 'error';
     }
 }
@@ -72,6 +86,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; background-color: <?php echo ($message_type == 'success') ? '#d4edda' : '#f8d7da'; ?>; border-left: 4px solid <?php echo ($message_type == 'success') ? '#28a745' : '#dc3545'; ?>; color: <?php echo ($message_type == 'success') ? '#155724' : '#721c24'; ?>;">
                 <?php echo htmlspecialchars($message); ?>
             </div>
+        <?php endif; ?>
+
+        <?php if ($receipt): ?>
+        <div style="margin-bottom:2rem;padding:1.5rem;background:#d4edda;border-radius:8px;border:2px solid #28a745;">
+            <h3 style="color:#155724;margin-bottom:1rem;">🎫 Purchase Confirmed!</h3>
+            <p><strong>Name:</strong> <?= htmlspecialchars($receipt['name']) ?> &nbsp; <strong>Visit Date:</strong> <?= date('F j, Y',strtotime($receipt['date'])) ?></p>
+            <p><strong>Payment:</strong> <?= ucfirst($receipt['payment']) ?> &nbsp; <?= $receipt['promo']?'<strong>Promo:</strong> '.$receipt['promo'].' &nbsp;':'' ?><strong>Total Paid:</strong> ₱<?= number_format($receipt['total'],2) ?></p>
+            <p style="margin-top:.75rem;"><strong>Your Ticket Code(s):</strong></p>
+            <?php foreach ($receipt['codes'] as $code): ?>
+            <code style="display:inline-block;background:#fff;border:1px solid #28a745;padding:.3rem .8rem;border-radius:4px;margin:.25rem;font-size:1rem;letter-spacing:2px;"><?= $code ?></code>
+            <?php endforeach; ?>
+        </div>
         <?php endif; ?>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
@@ -145,7 +171,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
                     <div class="form-group">
                         <label for="quantity">Number of Tickets *</label>
-                        <input type="number" id="quantity" name="quantity" min="1" max="50" value="1" required>
+                        <input type="number" id="quantity" name="quantity" min="1" max="50" value="1" required onchange="calcTicketTotal()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method *</label>
+                        <select id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="online">Online / GCash</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promo_code">Promo Code <small style="color:#888;">(optional)</small></label>
+                        <div style="display:flex;gap:.5rem;">
+                            <input type="text" id="promo_code" name="promo_code" placeholder="Enter code" style="text-transform:uppercase;flex:1;" onchange="calcTicketTotal()">
+                        </div>
+                        <?php if ($promoList): ?>
+                        <div style="margin-top:.5rem;font-size:.82rem;color:#666;">
+                            Active codes:
+                            <?php foreach ($promoList as $pc): ?>
+                            <span onclick="document.getElementById('promo_code').value='<?= $pc['code'] ?>';calcTicketTotal();"
+                                  style="cursor:pointer;background:#e8f5e9;color:#2e7d32;padding:.1rem .5rem;border-radius:4px;margin-left:.25rem;">
+                                <?= $pc['code'] ?> (<?= $pc['discount_type']==='percentage'?$pc['discount_value'].'% OFF':'₱'.$pc['discount_value'].' OFF' ?>)
+                            </span>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Live total -->
+                    <div id="total-box" style="padding:1rem;background:#f0f0f0;border-radius:6px;margin-bottom:1rem;display:none;">
+                        <div style="display:flex;justify-content:space-between;"><span>Subtotal:</span><span id="t-subtotal">₱0.00</span></div>
+                        <div style="display:flex;justify-content:space-between;color:#c62828;" id="t-disc-row"><span>Discount:</span><span id="t-discount">₱0.00</span></div>
+                        <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #ccc;margin-top:.5rem;padding-top:.5rem;"><span>Total:</span><span id="t-total">₱0.00</span></div>
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">Complete Purchase</button>
@@ -214,3 +274,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     </div>
 
 <?php include 'includes/footer.php'; ?>
+<script>
+const PRICES = {adult:500,child:400,senior:350,student:350,group:400};
+const PROMOS = {};
+<?php foreach ($promoList as $pc): ?>
+PROMOS['<?= $pc['code'] ?>'] = {type:'<?= $pc['discount_type'] ?>',val:<?= $pc['discount_value'] ?>};
+<?php endforeach; ?>
+function calcTicketTotal(){
+    const type = document.getElementById('ticket_type').value;
+    const qty  = parseInt(document.getElementById('quantity').value)||1;
+    const promo= (document.getElementById('promo_code').value||'').toUpperCase().trim();
+    if(!type){document.getElementById('total-box').style.display='none';return;}
+    const price = PRICES[type]||500;
+    const sub   = price*qty;
+    let disc=0;
+    if(promo && PROMOS[promo]){
+        const p=PROMOS[promo];
+        disc = p.type==='percentage' ? sub*(p.val/100) : Math.min(p.val,sub);
+    }
+    const total = Math.max(0,sub-disc);
+    document.getElementById('t-subtotal').textContent  = '₱'+sub.toFixed(2);
+    document.getElementById('t-discount').textContent  = '–₱'+disc.toFixed(2);
+    document.getElementById('t-total').textContent     = '₱'+total.toFixed(2);
+    document.getElementById('t-disc-row').style.display = disc>0?'flex':'none';
+    document.getElementById('total-box').style.display = 'block';
+}
+document.getElementById('ticket_type').addEventListener('change',calcTicketTotal);
+</script>

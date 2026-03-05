@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $specialization = sanitize($_POST['specialization']);
     $status = $_POST['status'];
     
-    if (isset($_POST['guide_id'])) {
+    if (!empty($_POST['guide_id'])) {
         $stmt = $pdo->prepare("UPDATE tour_guides SET full_name = ?, email = ?, phone = ?, specialization = ?, status = ? WHERE guide_id = ?");
         $stmt->execute([$full_name, $email, $phone, $specialization, $status, $_POST['guide_id']]);
     } else {

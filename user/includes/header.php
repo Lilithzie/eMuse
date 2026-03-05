@@ -35,6 +35,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a href="tickets.php" class="nav-link <?php echo ($current_page == 'tickets.php') ? 'active' : ''; ?>">Tickets</a>
                 </li>
+                <li class="nav-item">
+                    <a href="shop.php" class="nav-link <?php echo ($current_page == 'shop.php') ? 'active' : ''; ?>">Shop</a>
+                </li>
+                <li class="nav-item">
+                    <a href="feedback.php" class="nav-link <?php echo ($current_page == 'feedback.php') ? 'active' : ''; ?>">Feedback</a>
+                </li>
+                <?php if (isset($_SESSION['cart']) && array_sum($_SESSION['cart']) > 0): ?>
+                <li class="nav-item">
+                    <a href="cart.php" class="nav-link" style="background:var(--primary-dark);color:white;border-radius:4px;padding:.3rem .75rem;">
+                        🛒 <?= array_sum($_SESSION['cart']) ?>
+                    </a>
+                </li>
+                <?php endif; ?>
             </ul>
             <!-- Auth actions separated visually -->
             <div class="nav-auth-group">

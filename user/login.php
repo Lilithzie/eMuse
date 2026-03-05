@@ -10,48 +10,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $authenticated = false;
     
-    // First, try to authenticate as admin
-    $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? AND role IN ('super_admin', 'admin', 'staff')");
+    // First, try to authenticate as any staff / admin
+    $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ?");
     $stmt->execute([$username]);
     $admin = $stmt->fetch();
     
     if ($admin && password_verify($password, $admin['password'])) {
-        // Admin login successful
+        // Staff / admin login successful
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id'] = $admin['admin_id'];
+        $_SESSION['admin_id']   = $admin['admin_id'];
         $_SESSION['admin_name'] = $admin['full_name'];
         $_SESSION['admin_role'] = $admin['role'];
-        $_SESSION['user_type'] = 'admin';
-        header('Location: ../admin/index.php');
+        $_SESSION['admin_email']= $admin['email'];
+        $_SESSION['user_type']  = 'staff';
+        $authenticated = true;
+        redirectByRole($admin['role']);
         exit();
     }
     
-    // If not admin, try regular user
+    // If not staff, try regular visitor
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND status = 'active'");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
     
     if ($user && password_verify($password, $user['password'])) {
-        // Regular user login successful
+        // Visitor login successful
         $_SESSION['user_logged_in'] = true;
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['user_name'] = $user['full_name'];
+        $_SESSION['user_id']    = $user['user_id'];
+        $_SESSION['user_name']  = $user['full_name'];
         $_SESSION['user_email'] = $user['email'];
-        $_SESSION['user_type'] = 'user';
+        $_SESSION['user_type']  = 'user';
+        $authenticated = true;
         
         // Update last login
         $updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE user_id = ?");
         $updateStmt->execute([$user['user_id']]);
         
-        // Redirect to home page or previous page
-        $redirect = $_GET['redirect'] ?? 'index.php';
+        // Redirect to intended page or home
+        $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'index.php';
         header('Location: ' . $redirect);
         exit();
     }
     
-    // If neither admin nor user, show error
+    // Authentication failed
     if (!$authenticated) {
-        // Check if username exists at all to give a specific message
         $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM admin_users WHERE username = ?");
         $stmtCheck->execute([$username]);
         $adminExists = $stmtCheck->fetchColumn();
@@ -207,11 +209,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Login Info -->
         <div class="login-info">
-            <p><strong>Demo Credentials:</strong></p>
-            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
-                User: <strong>user</strong> / <strong>user123</strong><br>
-                Admin: <strong>admin</strong> / <strong>admin123</strong>
-            </p>
+            <p><strong>Demo Credentials (Staff password: Staff@123):</strong></p>
+            <table style="width:100%;font-size:0.82rem;margin-top:0.5rem;border-collapse:collapse;">
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Visitor</strong></td>
+                    <td>user / user123</td>
+                </tr>
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Admin</strong></td>
+                    <td>admin / admin123</td>
+                </tr>
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Ticketing</strong></td>
+                    <td>ticketing1</td>
+                </tr>
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Tour Guide</strong></td>
+                    <td>guide1</td>
+                </tr>
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Maintenance</strong></td>
+                    <td>maintenance1</td>
+                </tr>
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td><strong>Shop Staff</strong></td>
+                    <td>shopstaff1</td>
+                </tr>
+                <tr>
+                    <td><strong>Manager</strong></td>
+                    <td>manager</td>
+                </tr>
+            </table>
         </div>
         
         <!-- Register Link -->

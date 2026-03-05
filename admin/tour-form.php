@@ -103,7 +103,7 @@ include 'includes/header.php';
             </div>
             
             <div class="form-group">
-                <label for="price">Price ($) *</label>
+                <label for="price">Price (₱) *</label>
                 <input type="number" id="price" name="price" step="0.01" required value="<?php echo $tour['price'] ?? '25.00'; ?>">
             </div>
         </div>

@@ -18,8 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $message_type = 'error';
         } else {
             // Check availability
-            $check_stmt = $pdo->prepare("SELECT t.max_capacity, t.current_bookings, t.title 
-                                        FROM tours t WHERE tour_id = ?");
+            $check_stmt = $pdo->prepare("SELECT t.max_capacity, t.title,
+                (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb
+                 WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings
+                FROM tours t WHERE tour_id = ?");
             $check_stmt->execute([$tour_id]);
             $tour_info = $check_stmt->fetch();
 
@@ -35,10 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                                           VALUES (?, ?, ?, ?)");
                 $book_stmt->execute([$tour_id, $visitor_name, $visitor_email, $num_people]);
 
-                // Update current bookings
-                $update_stmt = $pdo->prepare("UPDATE tours SET current_bookings = current_bookings + ? WHERE tour_id = ?");
-                $update_stmt->execute([$num_people, $tour_id]);
-
                 $message = 'Tour booked successfully! Confirmation has been sent to ' . htmlspecialchars($visitor_email) . '.';
                 $message_type = 'success';
             }
@@ -47,6 +45,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $message = 'An error occurred while booking the tour.';
         $message_type = 'error';
     }
+}
+
+// Handle tour cancellation
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'cancel_booking') {
+    try {
+        $booking_id   = intval($_POST['booking_id']);
+        $cancel_email = trim($_POST['cancel_email']);
+        if (empty($cancel_email)) {
+            $message = 'Please enter your email to cancel a booking.'; $message_type = 'error';
+        } else {
+            $stmt = $pdo->prepare("SELECT tb.*, t.title, t.tour_date FROM tour_bookings tb JOIN tours t ON tb.tour_id=t.tour_id WHERE tb.booking_id=? AND tb.visitor_email=? AND tb.status='confirmed'");
+            $stmt->execute([$booking_id, $cancel_email]); $booking = $stmt->fetch();
+            if (!$booking) {
+                $message = 'Booking not found or email does not match.'; $message_type = 'error';
+            } elseif (strtotime($booking['tour_date']) < time()) {
+                $message = 'Cannot cancel a past tour booking.'; $message_type = 'error';
+            } else {
+                $pdo->prepare("UPDATE tour_bookings SET status='cancelled' WHERE booking_id=?")->execute([$booking_id]);
+                $message = "Booking #{$booking_id} for '{$booking['title']}' has been cancelled."; $message_type = 'success';
+            }
+        }
+    } catch (Exception $e) { $message = 'Error cancelling booking.'; $message_type = 'error'; }
 }
 
 $date_filter = isset($_GET['date']) ? trim($_GET['date']) : '';
@@ -90,7 +110,8 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             <?php
             try {
                 $query = "SELECT t.tour_id, t.title, t.description, t.tour_date, 
-                                 t.start_time, t.end_time, t.max_capacity, t.current_bookings, 
+                                 t.start_time, t.end_time, t.max_capacity,
+                                 (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings,
                                  t.price, t.status, tg.full_name as guide_name
                           FROM tours t
                           LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
@@ -142,7 +163,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                                         <strong>⏰ Time:</strong> <?php echo date('g:i A', strtotime($tour['start_time'])); ?> - <?php echo date('g:i A', strtotime($tour['end_time'])); ?>
                                     </p>
                                     <p class="text-muted" style="margin-bottom: 0.5rem;">
-                                        <strong>💰 Price:</strong> $<?php echo number_format($tour['price'] ?? 0, 2); ?> per person
+                                        <strong>💰 Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?> per person
                                     </p>
                                 </div>
 
@@ -238,6 +259,59 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                     <p>Book tours for your group and enjoy the camaraderie of exploring together.</p>
                 </div>
             </div>
+        </section>
+        <!-- Cancel a Booking -->
+        <section style="margin-top:3rem;padding:2rem;background:#fff3cd;border-radius:8px;border-left:4px solid #f57c00;">
+            <h2 style="color:#795548;margin-bottom:1rem;">Cancel a Booking</h2>
+            <p style="color:#555;margin-bottom:1.5rem;">Enter your booking ID and email address to cancel a confirmed booking.</p>
+            <form method="POST" action="tours.php" style="display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+                <input type="hidden" name="action" value="cancel_booking">
+                <div class="form-group" style="margin:0;">
+                    <label>Booking ID</label>
+                    <input type="number" name="booking_id" class="form-control" placeholder="e.g. 12" min="1" required style="padding:.6rem;">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Your Email</label>
+                    <input type="email" name="cancel_email" class="form-control" placeholder="Email used when booking" required style="padding:.6rem;">
+                </div>
+                <button type="submit" class="btn btn-secondary" style="padding:.6rem 1.2rem;background:#e64a19;color:white;border:none;border-radius:4px;">Cancel Booking</button>
+            </form>
+
+            <!-- Lookup bookings by email -->
+            <?php if (!empty($_GET['lookup_email'])): ?>
+            <?php
+                $lookupEmail = trim($_GET['lookup_email']);
+                $lookupRows = $pdo->prepare("SELECT tb.*, t.title, t.tour_date FROM tour_bookings tb JOIN tours t ON tb.tour_id=t.tour_id WHERE tb.visitor_email=? ORDER BY t.tour_date DESC LIMIT 10");
+                $lookupRows->execute([$lookupEmail]); $lookupRows = $lookupRows->fetchAll();
+            ?>
+            <div style="margin-top:1.5rem;">
+                <h4>Bookings for <?= htmlspecialchars($lookupEmail) ?>:</h4>
+                <?php if ($lookupRows): ?>
+                <table style="width:100%;border-collapse:collapse;margin-top:.75rem;font-size:.9rem;">
+                    <thead><tr style="background:#795548;color:white;"><th style="padding:.5rem;">ID</th><th>Tour</th><th>Date</th><th>People</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($lookupRows as $lr): ?>
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:.5rem 1rem;">#<?= $lr['booking_id'] ?></td>
+                        <td><?= htmlspecialchars($lr['title']) ?></td>
+                        <td><?= date('M j, Y', strtotime($lr['tour_date'])) ?></td>
+                        <td><?= $lr['number_of_people'] ?></td>
+                        <td><span><?= ucfirst($lr['status']) ?></span></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php else: ?><p style="color:#666;">No bookings found.</p><?php endif; ?>
+            </div>
+            <?php endif; ?>
+
+            <form method="GET" action="tours.php" style="margin-top:1rem;display:flex;gap:.75rem;align-items:flex-end;">
+                <div class="form-group" style="margin:0;flex:1;">
+                    <label style="font-size:.85rem;">Look up my bookings by email:</label>
+                    <input type="email" name="lookup_email" class="form-control" placeholder="Your email" style="padding:.5rem;" value="<?= htmlspecialchars($_GET['lookup_email'] ?? '') ?>">
+                </div>
+                <button type="submit" class="btn btn-secondary" style="padding:.5rem 1rem;">Look Up</button>
+            </form>
         </section>
     </div>
 
