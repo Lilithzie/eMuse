@@ -10,7 +10,7 @@ $end_date = $_GET['end_date'] ?? date('Y-m-t');
 $stmt = $pdo->prepare("
     SELECT * FROM revenue_tracking
     WHERE transaction_date BETWEEN ? AND ?
-    ORDER BY transaction_date DESC, created_at DESC
+    ORDER BY transaction_date ASC, created_at ASC
 ");
 $stmt->execute([$start_date, $end_date]);
 $transactions = $stmt->fetchAll();

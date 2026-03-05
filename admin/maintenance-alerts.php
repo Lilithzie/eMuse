@@ -22,7 +22,7 @@ $alerts = $pdo->query("
     FROM maintenance_alerts ma
     JOIN equipment e ON ma.equipment_id = e.equipment_id
     LEFT JOIN admin_users au ON ma.acknowledged_by = au.admin_id
-    ORDER BY ma.is_acknowledged ASC, ma.due_date ASC, ma.created_at DESC
+    ORDER BY ma.is_acknowledged ASC, ma.due_date ASC, ma.created_at ASC
 ")->fetchAll();
 
 // Get statistics

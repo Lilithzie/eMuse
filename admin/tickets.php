@@ -30,7 +30,7 @@ if ($search) {
     $params[] = $searchTerm;
 }
 
-$query .= " ORDER BY t.purchase_date DESC LIMIT 100";
+$query .= " ORDER BY t.purchase_date ASC LIMIT 100";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);

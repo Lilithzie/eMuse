@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-$guides = $pdo->query("SELECT * FROM tour_guides ORDER BY full_name")->fetchAll();
+$guides = $pdo->query("SELECT * FROM tour_guides ORDER BY guide_id")->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -158,10 +158,10 @@ function showAddModal() {
 function editGuide(guide) {
     document.getElementById('modalTitle').textContent = 'Edit Guide';
     document.getElementById('guide_id').value = guide.guide_id;
-    document.getElementById('full_name').value = guide.full_name;
-    document.getElementById('email').value = guide.email;
-    document.getElementById('phone').value = guide.phone;
-    document.getElementById('specialization').value = guide.specialization;
+    document.getElementById('full_name').value = guide.full_name || '';
+    document.getElementById('email').value = guide.email || '';
+    document.getElementById('phone').value = guide.phone || '';
+    document.getElementById('specialization').value = guide.specialization || '';
     document.getElementById('status').value = guide.status;
     document.getElementById('guideModal').style.display = 'flex';
 }

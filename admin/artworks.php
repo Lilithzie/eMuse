@@ -29,7 +29,7 @@ $artworks = $pdo->query("
     FROM artworks a 
     LEFT JOIN exhibits e ON a.exhibit_id = e.exhibit_id 
     LEFT JOIN locations l ON a.location_id = l.location_id 
-    ORDER BY a.created_at DESC
+    ORDER BY a.created_at ASC
 ")->fetchAll();
 
 include 'includes/header.php';

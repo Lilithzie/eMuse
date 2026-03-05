@@ -25,7 +25,7 @@ $sql = "
 if ($equipment_filter > 0) {
     $sql .= " WHERE mr.equipment_id = ?";
 }
-$sql .= " ORDER BY mr.scheduled_date DESC, mr.created_at DESC";
+$sql .= " ORDER BY mr.scheduled_date ASC, mr.created_at ASC";
 
 $stmt = $pdo->prepare($sql);
 if ($equipment_filter > 0) {

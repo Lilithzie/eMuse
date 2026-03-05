@@ -21,7 +21,7 @@ $stmt = $pdo->prepare("
     FROM product_sales ps
     LEFT JOIN admin_users au ON ps.served_by = au.admin_id
     WHERE ps.sale_date BETWEEN ? AND ?
-    ORDER BY ps.sale_date DESC, ps.created_at DESC
+    ORDER BY ps.sale_date ASC, ps.created_at ASC
 ");
 $stmt->execute([$start_date, $end_date]);
 $sales = $stmt->fetchAll();

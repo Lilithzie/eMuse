@@ -63,7 +63,7 @@ include 'includes/user-header.php';
                                              LEFT JOIN exhibit_classifications ec ON e.classification_id = ec.classification_id
                                              WHERE e.status IN ('active', 'upcoming')
                                              ORDER BY e.start_date DESC
-                                             LIMIT 6");
+                                             LIMIT 20");
                         $stmt->execute();
                         $exhibits = $stmt->fetchAll();
                         
@@ -127,8 +127,8 @@ include 'includes/user-header.php';
                                              l.name as location, a.description, a.image_path
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
-                                             ORDER BY a.artwork_id
-                                             LIMIT 6");
+                                             ORDER BY a.artwork_id 
+                                             LIMIT 16");
                         $stmt->execute();
                         $artworks = $stmt->fetchAll();
                         
@@ -198,7 +198,7 @@ include 'includes/user-header.php';
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
                                              WHERE t.status IN ('scheduled', 'ongoing')
                                              ORDER BY t.tour_date ASC
-                                             LIMIT 6");
+                                             LIMIT 20");
                         $stmt->execute();
                         $tours = $stmt->fetchAll();
                         

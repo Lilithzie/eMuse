@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-$locations = $pdo->query("SELECT * FROM locations ORDER BY name")->fetchAll();
+$locations = $pdo->query("SELECT * FROM locations ORDER BY location_id ASC")->fetchAll();
 include 'includes/header.php';
 ?>
 

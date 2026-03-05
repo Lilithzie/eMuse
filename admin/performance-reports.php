@@ -10,7 +10,7 @@ $end_date = $_GET['end_date'] ?? date('Y-m-t');
 $stmt = $pdo->prepare("
     SELECT * FROM performance_metrics
     WHERE metric_date BETWEEN ? AND ?
-    ORDER BY metric_date DESC, metric_type
+    ORDER BY metric_date ASC, metric_type
 ");
 $stmt->execute([$start_date, $end_date]);
 $metrics = $stmt->fetchAll();

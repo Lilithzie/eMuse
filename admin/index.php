@@ -24,7 +24,7 @@ $stmt->execute([$today]);
 $upcomingTours = $stmt->fetch()['total'];
 
 // Recent tickets
-$recentTickets = $pdo->query("SELECT * FROM tickets ORDER BY purchase_date DESC LIMIT 5")->fetchAll();
+$recentTickets = $pdo->query("SELECT * FROM tickets ORDER BY purchase_date ASC LIMIT 5")->fetchAll();
 
 // Upcoming tours list
 $upcomingToursList = $pdo->prepare("SELECT t.*, g.full_name as guide_name, (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings FROM tours t LEFT JOIN tour_guides g ON t.guide_id = g.guide_id WHERE t.tour_date >= ? AND t.status = 'scheduled' ORDER BY t.tour_date, t.start_time LIMIT 5");

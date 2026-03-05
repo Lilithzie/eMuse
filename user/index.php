@@ -124,11 +124,11 @@ include 'includes/header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, a.description
+                                             l.name as location, a.description, a.image_path
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
-                                             ORDER BY a.artwork_id DESC
-                                             LIMIT 6");
+                                             ORDER BY a.artwork_id
+                                             LIMIT 20");
                         $stmt->execute();
                         $artworks = $stmt->fetchAll();
                         
@@ -138,10 +138,16 @@ include 'includes/header.php';
                                 <div class="product-item">
                                     <div class="card shadow-sm product-card">
                                         <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                            <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
-                                                <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
-                                                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
-                                            </div>
+                                            <?php if (!empty($artwork['image_path'])): ?>
+                                                <img src="../<?php echo htmlspecialchars($artwork['image_path']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                                            <?php else: ?>
+                                                <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
+                                                    <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
+                                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <div class="card-body">
@@ -189,7 +195,7 @@ include 'includes/header.php';
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
                                              WHERE t.status IN ('scheduled', 'ongoing')
                                              ORDER BY t.tour_date ASC
-                                             LIMIT 6");
+                                             LIMIT 20");
                         $stmt->execute();
                         $tours = $stmt->fetchAll();
                         

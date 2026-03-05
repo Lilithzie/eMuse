@@ -41,7 +41,7 @@ $categoryData = $categoryStats->fetchAll();
 $recentFeedback = $pdo->prepare("
     SELECT * FROM visitor_feedback 
     WHERE created_at BETWEEN ? AND ?
-    ORDER BY created_at DESC
+    ORDER BY created_at ASC
     LIMIT 10
 ");
 $recentFeedback->execute([$start_date . ' 00:00:00', $end_date . ' 23:59:59']);

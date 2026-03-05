@@ -15,7 +15,7 @@ $exhibits = $pdo->query("
     SELECT e.*, c.name as classification_name 
     FROM exhibits e 
     LEFT JOIN exhibit_classifications c ON e.classification_id = c.classification_id 
-    ORDER BY e.start_date DESC
+    ORDER BY exhibit_id  ASC
 ")->fetchAll();
 
 include 'includes/header.php';

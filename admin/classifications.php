@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-$classifications = $pdo->query("SELECT * FROM exhibit_classifications ORDER BY name")->fetchAll();
+$classifications = $pdo->query("SELECT * FROM exhibit_classifications ORDER BY classification_id")->fetchAll();
 include 'includes/header.php';
 ?>
 

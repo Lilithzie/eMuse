@@ -16,7 +16,7 @@ $stmt = $pdo->query("
     SELECT p.*, pc.name as category_name
     FROM products p
     LEFT JOIN product_categories pc ON p.category_id = pc.category_id
-    ORDER BY p.created_at DESC
+    ORDER BY p.created_at ASC
 ");
 $products = $stmt->fetchAll();
 

@@ -16,7 +16,7 @@ $stmt = $pdo->query("
     SELECT e.*, l.name as location_name 
     FROM equipment e 
     LEFT JOIN locations l ON e.location_id = l.location_id 
-    ORDER BY e.created_at DESC
+    ORDER BY e.created_at ASC
 ");
 $equipment_list = $stmt->fetchAll();
 

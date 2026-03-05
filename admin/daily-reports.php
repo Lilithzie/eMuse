@@ -10,7 +10,7 @@ $end_date = $_GET['end_date'] ?? date('Y-m-t');
 $stmt = $pdo->prepare("
     SELECT * FROM daily_reports
     WHERE report_date BETWEEN ? AND ?
-    ORDER BY report_date DESC
+    ORDER BY report_date ASC
 ");
 $stmt->execute([$start_date, $end_date]);
 $reports = $stmt->fetchAll();

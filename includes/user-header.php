@@ -1,5 +1,8 @@
 <?php
 // User Side Header
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
@@ -32,9 +35,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a href="tickets.php" class="nav-link <?php echo ($current_page == 'tickets.php') ? 'active' : ''; ?>">Book Ticket</a>
                 </li>
-                <li class="nav-item">
-                    <a href="admin/login.php" class="nav-link nav-login">Login</a>
-                </li>
             </ul>
+            <!-- Auth actions -->
+            <div class="nav-auth-group">
+                <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
+                    <span class="nav-link nav-welcome" style="color: rgba(250,243,227,0.7); font-size:0.82rem; letter-spacing:0.5px; height:auto; padding:0; cursor:default;">
+                        Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                    </span>
+                    <a href="logout.php" class="nav-link nav-login">Logout</a>
+                <?php else: ?>
+                    <a href="login.php" class="nav-link nav-login <?php echo ($current_page == 'login.php') ? 'active' : ''; ?>">Login</a>
+                    <a href="register.php" class="nav-link nav-login <?php echo ($current_page == 'register.php') ? 'active' : ''; ?>">Register</a>
+                <?php endif; ?>
+            </div>
         </div>
     </nav>

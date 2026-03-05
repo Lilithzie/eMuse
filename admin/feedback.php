@@ -34,7 +34,7 @@ $sql = "
 if ($status_filter != 'all') {
     $sql .= " WHERE vf.status = ?";
 }
-$sql .= " ORDER BY vf.created_at DESC";
+$sql .= " ORDER BY vf.created_at ASC";
 
 $stmt = $pdo->prepare($sql);
 if ($status_filter != 'all') {
