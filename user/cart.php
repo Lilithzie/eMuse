@@ -25,6 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
 
 // ── Checkout ───────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+        $message = 'Please login to complete your purchase.';
+        $message_type = 'error';
+    } else {
     $customer_name  = trim($_POST['customer_name']  ?? '');
     $customer_email = trim($_POST['customer_email'] ?? '');
     $payment_method = trim($_POST['payment_method'] ?? 'cash');
@@ -114,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         } catch (Exception $e) {
             $message = 'An error occurred: ' . $e->getMessage(); $message_type = 'error';
         }
+    }
     }
 }
 
@@ -239,6 +245,16 @@ foreach ($_SESSION['cart'] as $pid => $qty) {
 
         <!-- Checkout panel -->
         <div>
+            <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
+            <div style="background:white;border:1px solid #eee;border-radius:8px;padding:1.5rem;position:sticky;top:1rem;">
+                <h3 style="margin-bottom:1rem;color:var(--primary-dark);">Complete Your Purchase</h3>
+                <div style="padding:2rem;text-align:center;background:#f9f9f9;border-radius:8px;border:2px dashed var(--primary-light);">
+                    <p style="font-size:1rem;color:#666;margin-bottom:1rem;">Please login to checkout</p>
+                    <a href="login.php" class="btn btn-primary" style="margin-right:.5rem;">Login</a>
+                    <a href="register.php" class="btn btn-secondary">Register</a>
+                </div>
+            </div>
+            <?php else: ?>
             <form method="POST" action="cart.php" style="background:white;border:1px solid #eee;border-radius:8px;padding:1.5rem;position:sticky;top:1rem;">
                 <input type="hidden" name="checkout" value="1">
                 <h3 style="margin-bottom:1.25rem;color:var(--primary-dark);">Order Summary</h3>
@@ -297,6 +313,7 @@ foreach ($_SESSION['cart'] as $pid => $qty) {
                     💳 Place Order
                 </button>
             </form>
+            <?php endif; ?>
         </div>
 
     </div>

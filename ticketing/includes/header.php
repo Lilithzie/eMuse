@@ -11,9 +11,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title>eMuse – Ticketing Staff</title>
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo @filemtime('../assets/css/style.css'); ?>">
     <style>
-        :root { --portal-color:#1565c0; --portal-light:#e3f2fd; }
         .sidebar-header p { color:rgba(255,255,255,.65); }
-        .sidebar { background: var(--portal-color); }
         .nav-item:hover,.nav-item.active { background:rgba(255,255,255,.15); }
         .nav-section { color:rgba(255,255,255,.5); }
     </style>

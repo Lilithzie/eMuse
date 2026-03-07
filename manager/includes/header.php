@@ -11,13 +11,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <title>eMuse — Manager Portal</title>
     <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/style.css">
     <style>
-        :root { --manager-dark:#004d40; --manager-mid:#00695c; --manager-light:#e0f2f1; }
-        .sidebar { background: var(--manager-dark); }
-        .sidebar .brand { border-bottom-color: var(--manager-mid); }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: var(--manager-mid); }
-        .stat-card { border-left: 4px solid var(--manager-dark); }
-        .btn-primary { background: var(--manager-dark); }
-        .badge-manager { background: var(--manager-light); color: var(--manager-dark); }
+        .sidebar .brand { border-bottom-color: var(--color-sidebar-hover); }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: var(--color-sidebar-hover); }
+        .stat-card { border-left: 4px solid var(--color-sidebar); }
+        .badge-manager { background: var(--cream-harvest); color: var(--cocoa-bark); }
     </style>
 </head>
 <body>

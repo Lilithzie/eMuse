@@ -28,24 +28,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $supplier = sanitize($_POST['supplier']);
     $status = $_POST['status'];
     
+    // Handle image upload
+    $image_path = $product['image_path'] ?? '';
+    if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $file_type = $_FILES['product_image']['type'];
+        
+        if (in_array($file_type, $allowed_types)) {
+            // Keep original filename with sanitization
+            $original_name = $_FILES['product_image']['name'];
+            // Remove special characters, keep only alphanumeric, dots, dashes, underscores
+            $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $original_name);
+            $filename = strtolower($filename);
+            $upload_path = '../img/' . $filename;
+            
+            if (move_uploaded_file($_FILES['product_image']['tmp_name'], $upload_path)) {
+                // Delete old image if updating and new image uploaded
+                if ($isEdit && !empty($product['image_path']) && file_exists('../' . $product['image_path'])) {
+                    unlink('../' . $product['image_path']);
+                }
+                $image_path = 'img/' . $filename;
+            }
+        }
+    }
+    
     if ($isEdit) {
         $stmt = $pdo->prepare("
             UPDATE products 
             SET name = ?, category_id = ?, sku = ?, description = ?, price = ?, 
-                cost_price = ?, stock_quantity = ?, reorder_level = ?, supplier = ?, status = ?
+                cost_price = ?, stock_quantity = ?, reorder_level = ?, supplier = ?, status = ?, image_path = ?
             WHERE product_id = ?
         ");
         $stmt->execute([$name, $category_id, $sku, $description, $price, $cost_price, 
-                       $stock_quantity, $reorder_level, $supplier, $status, $product_id]);
+                       $stock_quantity, $reorder_level, $supplier, $status, $image_path, $product_id]);
         header('Location: products.php?success=update');
     } else {
         $stmt = $pdo->prepare("
             INSERT INTO products (name, category_id, sku, description, price, cost_price, 
-                                stock_quantity, reorder_level, supplier, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                stock_quantity, reorder_level, supplier, status, image_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([$name, $category_id, $sku, $description, $price, $cost_price, 
-                       $stock_quantity, $reorder_level, $supplier, $status]);
+                       $stock_quantity, $reorder_level, $supplier, $status, $image_path]);
         header('Location: products.php?success=create');
     }
     exit();
@@ -66,7 +90,7 @@ include 'includes/header.php';
 
 <div class="card">
     <div class="card-body">
-        <form method="POST" class="form">
+        <form method="POST" enctype="multipart/form-data" class="form">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="name">Product Name *</label>
@@ -137,6 +161,20 @@ include 'includes/header.php';
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" name="description" class="form-control" rows="4"><?php echo $product['description'] ?? ''; ?></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="product_image">Product Image</label>
+                <?php if ($isEdit && !empty($product['image_path'])): ?>
+                    <div style="margin-bottom: 10px;">
+                        <img src="../<?php echo htmlspecialchars($product['image_path']); ?>" 
+                             alt="Current product image" 
+                             style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Current image</p>
+                    </div>
+                <?php endif; ?>
+                <input type="file" id="product_image" name="product_image" class="form-control" accept="image/*">
+                <small style="color: #666;">Accepted formats: JPG, PNG, GIF, WEBP</small>
             </div>
             
             <div class="form-actions">

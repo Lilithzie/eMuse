@@ -16,7 +16,7 @@ include 'includes/header.php';
                 </div>
             </div>
             <div class="hero-media">
-                <img src="../img/hero.jpg" alt="eMuse Museum Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--card-radius);">
+                <img src="../img/heroi.jpg" alt="eMuse Museum Hero" style="width: 80%; height: 100%; object-fit: cover">
             </div>
         </div>
     </section>
@@ -189,11 +189,12 @@ include 'includes/header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT t.tour_id, t.title, t.description, t.tour_date, 
-                                             t.start_time, t.end_time, t.max_capacity, t.current_bookings, 
+                                             t.start_time, t.end_time, t.max_capacity,
+                                             (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id = t.tour_id AND tb.status = 'confirmed') AS current_bookings,
                                              t.price, tg.full_name as guide_name
                                              FROM tours t
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
-                                             WHERE t.status IN ('scheduled', 'ongoing')
+                                             WHERE t.status IN ('scheduled', 'ongoing') AND t.tour_date >= CURDATE()
                                              ORDER BY t.tour_date ASC
                                              LIMIT 20");
                         $stmt->execute();
@@ -217,7 +218,7 @@ include 'includes/header.php';
                                             <h5 class="card-title product-name"><?php echo htmlspecialchars($tour['title']); ?></h5>
                                             <p class="product-scent">Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?></p>
                                             <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Price:</strong> $<?php echo number_format($tour['price'] ?? 0, 2); ?>
+                                                <strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?>
                                             </p>
                                             
                                             <!-- Capacity Bar -->

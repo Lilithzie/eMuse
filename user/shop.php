@@ -10,6 +10,11 @@ $msg = ''; $msgType = '';
 
 // Add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+        $msg = 'Please login to add items to your cart.';
+        $msgType = 'error';
+    } else {
     $pid = (int)$_POST['product_id'];
     $qty = max(1, (int)($_POST['quantity'] ?? 1));
     $stmt = $pdo->prepare("SELECT * FROM products WHERE product_id=? AND status='active' AND stock_quantity > 0");
@@ -21,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
         $msg = "Added '{$prod['name']}' to cart."; $msgType = 'success';
     } else {
         $msg = "Item unavailable."; $msgType = 'error';
+    }
     }
 }
 
@@ -71,17 +77,20 @@ $cartCount  = array_sum($_SESSION['cart']);
     </form>
 
     <!-- Products Grid -->
-    <div class="cards-grid">
+    <div class="products-grid">
         <?php foreach ($products as $p): ?>
-        <div class="card">
+        <div class="product-item">
+            <div class="card shadow-sm product-card">
             <?php if (!empty($p['image_path'])): ?>
-            <img src="../<?= htmlspecialchars($p['image_path']) ?>" alt="<?= htmlspecialchars($p['name']) ?>" style="width:100%;height:180px;object-fit:cover;border-radius:8px 8px 0 0;">
+            <div style="overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
+                <img src="../<?= htmlspecialchars($p['image_path']) ?>" alt="<?= htmlspecialchars($p['name']) ?>" style="width:100%;height:200px;object-fit:cover;">
+            </div>
             <?php else: ?>
-            <div style="width:100%;height:140px;background:linear-gradient(135deg,var(--primary-accent),#ffe0b2);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:3rem;">🛍️</div>
+            <div style="overflow: hidden; border-radius: 12px 12px 0 0; background:linear-gradient(135deg,var(--primary-accent),#ffe0b2);min-height:200px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🛍️</div>
             <?php endif; ?>
             <div class="card-body">
-                <h3 style="font-size:1rem;"><?= htmlspecialchars($p['name']) ?></h3>
-                <p style="font-size:.85rem;color:#666;"><?= htmlspecialchars($p['category'] ?? '') ?></p>
+                <h3 class="card-title product-name" style="font-size:1rem;"><?= htmlspecialchars($p['name']) ?></h3>
+                <p class="product-scent" style="font-size:.85rem;color:#666;"><?= htmlspecialchars($p['category'] ?? '') ?></p>
                 <?php if ($p['description']): ?>
                 <p style="font-size:.85rem;color:#555;margin-top:.5rem;"><?= htmlspecialchars(substr($p['description'],0,80)) ?>…</p>
                 <?php endif; ?>
@@ -90,13 +99,18 @@ $cartCount  = array_sum($_SESSION['cart']);
                     <span style="font-size:.8rem;color:<?= $p['stock_quantity']<=5?'#c62828':'#666' ?>;"><?= $p['stock_quantity'] ?> in stock</span>
                 </div>
             </div>
-            <div class="card-footer">
+            <div class="card-footer product-actions" style="margin-top:1rem;">
+                <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
+                    <a href="login.php" class="btn btn-secondary" style="width:100%;padding:.5rem;text-align:center;text-decoration:none;">Login to Purchase</a>
+                <?php else: ?>
                 <form method="POST" action="shop.php?cat=<?= $filterCat ?>&search=<?= urlencode($search) ?>" style="display:flex;gap:.5rem;align-items:center;width:100%;">
                     <input type="hidden" name="product_id" value="<?= $p['product_id'] ?>">
                     <input type="hidden" name="add_to_cart" value="1">
                     <input type="number" name="quantity" min="1" max="<?= $p['stock_quantity'] ?>" value="1" style="width:55px;padding:.4rem;border:1px solid #ddd;border-radius:4px;font-size:.85rem;">
                     <button type="submit" class="btn btn-primary" style="flex:1;padding:.5rem;">Add to Cart</button>
                 </form>
+                <?php endif; ?>
+            </div>
             </div>
         </div>
         <?php endforeach; ?>

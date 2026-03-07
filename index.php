@@ -5,6 +5,9 @@ include 'includes/user-header.php';
 
     <!-- Hero Section -->
     <section class="hero">
+        <div class="hero-media">
+            <img src="img/hero.jpg" alt="eMuse Museum Hero">
+        </div>
         <div class="hero-inner">
             <div>
                 <h1>Welcome to eMuse</h1>
@@ -14,9 +17,6 @@ include 'includes/user-header.php';
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
                     <a href="tickets.php" class="btn btn-outline-primary btn-lg">Book Your Visit</a>
                 </div>
-            </div>
-            <div class="hero-media">
-                <img src="img/hero.jpg" alt="eMuse Museum Hero" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--card-radius);">
             </div>
         </div>
     </section>
@@ -111,69 +111,84 @@ include 'includes/user-header.php';
             </div>
         </section>
 
-        <!-- Artifacts & Artworks Section -->
+        <!-- Artifacts & Artworks Section - Carousel Style -->
         <section id="popular-artworks" class="py-5">
-            <div class="container text-center">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="mb-0">Featured Artworks</h2>
-                    <a href="artworks.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
-                </div>
-                <p class="section-subtitle">Discover masterpieces from our extensive collection across all locations.</p>
-                
-                <div class="products-grid">
-                    <?php
-                    try {
-                        $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, a.description, a.image_path
-                                             FROM artworks a 
-                                             LEFT JOIN locations l ON a.location_id = l.location_id
-                                             ORDER BY a.artwork_id 
-                                             LIMIT 16");
-                        $stmt->execute();
-                        $artworks = $stmt->fetchAll();
+            <div class="container">
+                <div class="artwork-carousel">
+                    <div class="artwork-carousel-header">
+                        <h2>Which Artwork Calls to You?</h2>
+                        <p>Discover masterpieces from our extensive collection across all galleries.</p>
+                    </div>
+                    
+                    <div class="carousel-wrapper">
+                        <button class="carousel-arrow prev" onclick="moveCarousel(-1)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
                         
-                        if ($artworks) {
-                            foreach ($artworks as $artwork) {
-                                ?>
-                                <div class="product-item">
-                                    <div class="card shadow-sm product-card">
-                                        <?php if (!empty($artwork['image_path'])): ?>
-                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
+                        <div class="carousel-track" id="artworkCarousel">
+                            <?php
+                            try {
+                                $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
+                                                     l.name as location, a.description, a.image_path
+                                                     FROM artworks a 
+                                                     LEFT JOIN locations l ON a.location_id = l.location_id
+                                                     ORDER BY a.artwork_id 
+                                                     LIMIT 12");
+                                $stmt->execute();
+                                $artworks = $stmt->fetchAll();
+                                
+                                if ($artworks) {
+                                    foreach ($artworks as $artwork) {
+                                        $shortDesc = !empty($artwork['description']) 
+                                            ? substr($artwork['description'], 0, 100) . '...' 
+                                            : 'A stunning piece from our collection.';
+                                        ?>
+                                        <div class="carousel-slide">
+                                            <?php if (!empty($artwork['image_path'])): ?>
                                                 <img src="<?php echo htmlspecialchars($artwork['image_path']); ?>" 
-                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>"
-                                                     style="width: 100%; height: 200px; object-fit: cover;">
-                                            </div>
-                                        <?php else: ?>
-                                            <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                                <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
-                                                    <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
-                                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
+                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>">
+                                            <?php else: ?>
+                                                <div style="height: 220px; background: linear-gradient(135deg, var(--smoky-oak) 0%, var(--chestnut-grove) 100%); display: flex; align-items: center; justify-content: center;">
+                                                    <span style="color: var(--cream-harvest); font-size: 3rem;">🎨</span>
                                                 </div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <div class="card-body">
-                                            <h5 class="card-title product-name"><?php echo htmlspecialchars($artwork['title']); ?></h5>
-                                            <p class="product-scent"><?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?></p>
-                                            <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Location:</strong> <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
-                                            </p>
+                                            <?php endif; ?>
                                             
-                                            <div class="product-actions" style="margin-top: 1rem;">
-                                                <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%;">View Details</a>
+                                            <div class="carousel-slide-content">
+                                                <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
+                                                <p style="color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;">
+                                                    <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
+                                                </p>
+                                                <p><?php echo htmlspecialchars($shortDesc); ?></p>
+                                                <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn">View Artwork</a>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <?php
+                                        <?php
+                                    }
+                                } else {
+                                    echo '<div style="text-align: center; padding: 40px; width: 100%;">No artworks currently available.</div>';
+                                }
+                            } catch (Exception $e) {
+                                echo '<div style="text-align: center; padding: 40px; width: 100%;">Unable to load artworks.</div>';
                             }
-                        } else {
-                            echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">No artworks currently available.</div>';
-                        }
-                    } catch (Exception $e) {
-                        echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">Unable to load artworks.</div>';
-                    }
-                    ?>
+                            ?>
+                        </div>
+                        
+                        <button class="carousel-arrow next" onclick="moveCarousel(1)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="carousel-dots" id="carouselDots">
+                        <!-- Dots will be generated by JS -->
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="artworks.php" class="btn btn-secondary">Browse All Artworks</a>
                 </div>
             </div>
         </section>
@@ -196,7 +211,7 @@ include 'includes/user-header.php';
                                              t.price, tg.full_name as guide_name
                                              FROM tours t
                                              LEFT JOIN tour_guides tg ON t.guide_id = tg.guide_id
-                                             WHERE t.status IN ('scheduled', 'ongoing')
+                                             WHERE t.status IN ('scheduled', 'ongoing') AND t.tour_date >= CURDATE()
                                              ORDER BY t.tour_date ASC
                                              LIMIT 20");
                         $stmt->execute();

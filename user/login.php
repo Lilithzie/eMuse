@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     .login-header h1 {
-        color: var(--chestnut-grove);
+        color: var(--primary-light);
         margin-bottom: 0.5rem;
         font-size: 2rem;
     }
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     .login-info strong {
-        color: var(--chestnut-grove);
+        color: var(--primary-light);
     }
     
     .register-link {
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     .register-link a {
-        color: var(--chestnut-grove);
+        color: var(--primary-light);
         text-decoration: none;
         font-weight: 500;
     }

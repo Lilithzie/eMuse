@@ -7,6 +7,11 @@ $message_type = '';
 
 // Handle tour booking
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'book_tour') {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+        $message = 'Please login to book a tour.';
+        $message_type = 'error';
+    } else {
     try {
         $tour_id = intval($_POST['tour_id']);
         $visitor_name = trim($_POST['visitor_name']);
@@ -45,10 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $message = 'An error occurred while booking the tour.';
         $message_type = 'error';
     }
+    }
 }
 
 // Handle tour cancellation
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'cancel_booking') {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+        $message = 'Please login to cancel a tour booking.';
+        $message_type = 'error';
+    } else {
     try {
         $booking_id   = intval($_POST['booking_id']);
         $cancel_email = trim($_POST['cancel_email']);
@@ -67,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             }
         }
     } catch (Exception $e) { $message = 'Error cancelling booking.'; $message_type = 'error'; }
+    }
 }
 
 $date_filter = isset($_GET['date']) ? trim($_GET['date']) : '';
@@ -185,9 +197,15 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                             <div class="card-footer">
                                 <?php if ($available > 0 && !$is_past): ?>
                                     <span class="card-badge" style="background-color: #4CAF50; color: white;">Available</span>
+                                    <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
+                                        <a href="login.php" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration:none;">
+                                            Login to Book
+                                        </a>
+                                    <?php else: ?>
                                     <button onclick="document.getElementById('bookingForm<?php echo $tour['tour_id']; ?>').style.display='block'" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                         Book Now
                                     </button>
+                                    <?php endif; ?>
                                 <?php elseif ($is_past): ?>
                                     <span class="card-badge" style="background-color: #999; color: white;">Past Tour</span>
                                 <?php else: ?>
@@ -261,6 +279,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             </div>
         </section>
         <!-- Cancel a Booking -->
+        <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
         <section style="margin-top:3rem;padding:2rem;background:#fff3cd;border-radius:8px;border-left:4px solid #f57c00;">
             <h2 style="color:#795548;margin-bottom:1rem;">Cancel a Booking</h2>
             <p style="color:#555;margin-bottom:1.5rem;">Enter your booking ID and email address to cancel a confirmed booking.</p>
@@ -313,6 +332,7 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                 <button type="submit" class="btn btn-secondary" style="padding:.5rem 1rem;">Look Up</button>
             </form>
         </section>
+        <?php endif; ?>
     </div>
 
 <?php include 'includes/footer.php'; ?>

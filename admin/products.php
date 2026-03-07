@@ -122,6 +122,7 @@ include 'includes/header.php';
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>SKU</th>
                         <th>Product Name</th>
                         <th>Category</th>
@@ -136,11 +137,20 @@ include 'includes/header.php';
                 <tbody>
                     <?php if (empty($products)): ?>
                         <tr>
-                            <td colspan="9" style="text-align: center;">No products found</td>
+                            <td colspan="10" style="text-align: center;">No products found</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
                             <tr class="<?php echo $product['stock_quantity'] <= $product['reorder_level'] ? 'low-stock-row' : ''; ?>">
+                                <td>
+                                    <?php if (!empty($product['image_path'])): ?>
+                                        <img src="../<?php echo htmlspecialchars($product['image_path']); ?>" 
+                                             alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                    <?php else: ?>
+                                        <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">📦</div>
+                                    <?php endif; ?>
+                                </td>
                                 <td><span class="badge badge-secondary"><?php echo htmlspecialchars($product['sku']); ?></span></td>
                                 <td><strong><?php echo htmlspecialchars($product['name']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($product['category_name'] ?? 'Uncategorized'); ?></td>

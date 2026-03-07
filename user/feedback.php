@@ -6,6 +6,11 @@ $message = ''; $message_type = '';
 
 // Handle feedback submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+        $message = 'Please login to submit feedback.';
+        $message_type = 'error';
+    } else {
     try {
         $visitor_name       = trim($_POST['visitor_name']);
         $visitor_email      = trim($_POST['visitor_email']);
@@ -32,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
         }
     } catch (Exception $e) {
         $message = 'An error occurred. Please try again.'; $message_type = 'error';
+    }
     }
 }
 
@@ -80,6 +86,13 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
             <!-- Feedback Form -->
             <div style="background:white;padding:2rem;border-radius:8px;border:1px solid var(--border-color);">
                 <h2 style="color:var(--primary-dark);margin-bottom:1.5rem;">Leave a Review</h2>
+                <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
+                <div style="padding:2rem;text-align:center;background:#f9f9f9;border-radius:8px;border:2px dashed var(--primary-light);">
+                    <p style="font-size:1.1rem;color:#666;margin-bottom:1rem;">Please login to submit your feedback</p>
+                    <a href="login.php" class="btn btn-primary" style="margin-right:.5rem;">Login</a>
+                    <a href="register.php" class="btn btn-secondary">Register</a>
+                </div>
+                <?php else: ?>
                 <form method="POST">
                     <div class="form-group">
                         <label>Full Name *</label>
@@ -134,6 +147,7 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
 
                     <button type="submit" name="submit_feedback" class="btn btn-primary" style="width:100%;padding:1rem;">Submit Feedback</button>
                 </form>
+                <?php endif; ?>
             </div>
 
             <!-- Testimonials -->
@@ -153,7 +167,7 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
                 </div>
                 <?php endforeach; ?>
                 <?php else: ?>
-                <div style="padding:2rem;text-align:center;color:#999;">Be the first to leave a review!</div>
+                <div style="padding:2rem;text-align:center">Be the first to leave a review!</div>
                 <?php endif; ?>
             </div>
         </div>

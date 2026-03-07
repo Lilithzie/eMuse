@@ -594,6 +594,14 @@ INSERT IGNORE INTO promo_codes (code, discount_type, discount_value, valid_from,
 ('TOUR15',    'percentage', 15.00, '2026-03-01', '2026-09-30', 'tours',    'active'),
 ('SHOP20',    'percentage', 20.00, '2026-03-01', '2026-06-30', 'products', 'active');
 
+~~ Exhibits
+INSERT INTO exhibits (title, description, classification_id, start_date, end_date, status) VALUES
+('Egyptian Mummies', 'Ancient preserved mummies from Egypt', 1, '2026-04-01', '2026-06-01', 'upcoming'),
+('Digital Art Gallery', 'Interactive modern digital artworks', 2, '2026-03-15', '2026-07-15', 'active'),
+('Dinosaur Fossils', 'Real fossils from prehistoric dinosaurs', 3, '2026-05-01', '2026-09-01', 'upcoming'),
+('Traditional Filipino Textiles', 'Cultural weaving and fabrics', 4, '2026-02-01', '2026-05-01', 'active'),
+('Robotics Exhibition', 'Latest robotics and AI technology', 5, '2026-08-01', '2026-12-01', 'upcoming');
+
 -- Tour guide records (linked to admin accounts)
 INSERT IGNORE INTO tour_guides (full_name, email, phone, specialization, status)
   SELECT full_name, email, NULL, 'General Tours', 'active'
@@ -608,12 +616,22 @@ UPDATE tour_guides SET admin_id = (SELECT admin_id FROM admin_users WHERE userna
 -- Sample tours (inserted after guides exist)
 INSERT IGNORE INTO tours (title, description, guide_id, tour_date, start_time, end_time, max_capacity, price, status)
   SELECT 'Morning Heritage Walk', 'Explore the ancient history section with our expert guide.',
-         g.guide_id, CURDATE(), '09:00:00', '10:30:00', 20, 150.00, 'scheduled'
+         g.guide_id, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '09:00:00', '10:30:00', 20, 150.00, 'scheduled'
   FROM tour_guides g WHERE g.full_name='Carlos Dela Cruz' LIMIT 1;
 
 INSERT IGNORE INTO tours (title, description, guide_id, tour_date, start_time, end_time, max_capacity, price, status)
   SELECT 'Afternoon Modern Art Tour', 'Guided walkthrough of modern and contemporary art exhibits.',
-         g.guide_id, CURDATE(), '14:00:00', '15:30:00', 15, 150.00, 'scheduled'
+         g.guide_id, DATE_ADD(CURDATE(), INTERVAL 3 DAY), '14:00:00', '15:30:00', 15, 150.00, 'scheduled'
+  FROM tour_guides g WHERE g.full_name='Diana Villanueva' LIMIT 1;
+
+INSERT IGNORE INTO tours (title, description, guide_id, tour_date, start_time, end_time, max_capacity, price, status)
+  SELECT 'Weekend Gallery Tour', 'A comprehensive tour covering all galleries and special collections.',
+         g.guide_id, DATE_ADD(CURDATE(), INTERVAL 3 DAY), '10:00:00', '12:00:00', 25, 200.00, 'scheduled'
+  FROM tour_guides g WHERE g.full_name='Carlos Dela Cruz' LIMIT 1;
+
+INSERT IGNORE INTO tours (title, description, guide_id, tour_date, start_time, end_time, max_capacity, price, status)
+  SELECT 'Evening Art Appreciation', 'Discover the stories behind our masterpieces in this evening tour.',
+         g.guide_id, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '17:00:00', '18:30:00', 15, 175.00, 'scheduled'
   FROM tour_guides g WHERE g.full_name='Diana Villanueva' LIMIT 1;
 
 SELECT 'eMuse_db setup completed successfully!' AS status;
