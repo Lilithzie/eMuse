@@ -47,14 +47,14 @@ include 'includes/header.php';
     <div class="container">
         <!-- Featured Exhibits Section -->
         <section id="featured-exhibits" class="py-5">
-            <div class="container text-center">
+            <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="mb-0">Featured Exhibits</h2>
+                    <h2 class="section-title mb-0">Featured Exhibits</h2>
                     <a href="exhibits.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
                 </div>
                 <p class="section-subtitle">Explore our current and upcoming exhibitions curated by world-class experts.</p>
                 
-                <div class="products-grid">
+                <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT e.exhibit_id, e.title, e.description, e.status, 
@@ -72,39 +72,38 @@ include 'includes/header.php';
                                 $status_class = 'status-' . $exhibit['status'];
                                 $status_text = ucfirst($exhibit['status']);
                                 ?>
-                                <div class="product-item">
-                                    <div class="card shadow-sm product-card">
-                                        <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--btn-bg) 0%, var(--smoky-oak) 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                            <div style="color: var(--text-light); text-align: center; padding: 2rem;">
-                                                <h4 style="margin: 0; font-size: 1.3rem;"><?php echo htmlspecialchars($exhibit['classification'] ?? 'General'); ?></h4>
-                                            </div>
-                                            <?php if ($exhibit['status'] === 'active'): ?>
-                                                <div class="badge-bestseller">Active</div>
-                                            <?php endif; ?>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><?php echo htmlspecialchars($exhibit['title']); ?></h3>
+                                        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                                            <?php echo htmlspecialchars($exhibit['classification'] ?? 'General'); ?>
+                                        </p>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><?php echo htmlspecialchars($exhibit['description'] ?? 'No description available'); ?></p>
+                                        
+                                        <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                            <span class="location-badge"><?php echo $status_text; ?></span>
+                                            <span class="location-badge"><?php echo htmlspecialchars($exhibit['classification'] ?? 'General'); ?></span>
                                         </div>
                                         
-                                        <div class="card-body">
-                                            <h5 class="card-title product-name"><?php echo htmlspecialchars($exhibit['title']); ?></h5>
-                                            <p class="product-scent"><?php echo htmlspecialchars($exhibit['classification'] ?? 'General'); ?></p>
-                                            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <?php echo date('M d, Y', strtotime($exhibit['start_date'])); ?> - 
-                                                <?php echo date('M d, Y', strtotime($exhibit['end_date'])); ?>
-                                            </p>
-                                            
-                                            <div class="product-actions" style="margin-top: 1rem;">
-                                                <a href="exhibits.php?id=<?php echo $exhibit['exhibit_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%; margin-bottom: 0.5rem;">Learn More</a>
-                                                <span class="card-badge <?php echo $status_class; ?>" style="display: inline-block; width: 100%; text-align: center;"><?php echo $status_text; ?></span>
-                                            </div>
-                                        </div>
+                                        <p class="text-muted">
+                                            <strong>Duration:</strong><br>
+                                            <?php echo date('M d, Y', strtotime($exhibit['start_date'])); ?> - 
+                                            <?php echo date('M d, Y', strtotime($exhibit['end_date'])); ?>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="exhibits.php?id=<?php echo $exhibit['exhibit_id']; ?>" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Learn More</a>
                                     </div>
                                 </div>
                                 <?php
                             }
                         } else {
-                            echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">No exhibits currently available.</div>';
+                            echo '<div class="no-data" style="grid-column: 1/-1;"><p>No exhibits currently available.</p></div>';
                         }
                     } catch (Exception $e) {
-                        echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">Unable to load exhibits.</div>';
+                        echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load exhibits.</p></div>';
                     }
                     ?>
                 </div>
@@ -113,18 +112,18 @@ include 'includes/header.php';
 
         <!-- Artifacts & Artworks Section -->
         <section id="popular-artworks" class="py-5">
-            <div class="container text-center">
+            <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="mb-0">Featured Artworks</h2>
+                    <h2 class="section-title mb-0">Featured Artworks</h2>
                     <a href="artworks.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
                 </div>
                 <p class="section-subtitle">Discover masterpieces from our extensive collection across all locations.</p>
                 
-                <div class="products-grid">
+                <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, a.description, a.image_path
+                                             l.name as location, l.floor, a.description, a.image_path
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
                                              ORDER BY a.artwork_id
@@ -135,41 +134,47 @@ include 'includes/header.php';
                         if ($artworks) {
                             foreach ($artworks as $artwork) {
                                 ?>
-                                <div class="product-item">
-                                    <div class="card shadow-sm product-card">
-                                        <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--accent) 0%, #e0d4c1 100%); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                            <?php if (!empty($artwork['image_path'])): ?>
-                                                <img src="../<?php echo htmlspecialchars($artwork['image_path']); ?>" 
-                                                     alt="<?php echo htmlspecialchars($artwork['title']); ?>"
-                                                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
-                                            <?php else: ?>
-                                                <div style="color: var(--text-dark); text-align: center; padding: 2rem;">
-                                                    <h4 style="margin: 0; font-size: 1.1rem;"><?php echo htmlspecialchars($artwork['type']); ?></h4>
-                                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></p>
-                                                </div>
-                                            <?php endif; ?>
+                                <div class="card">
+                                    <?php if (!empty($artwork['image_path'])): ?>
+                                        <div class="card-image" style="height: 200px; overflow: hidden; border-radius: 8px 8px 0 0;">
+                                            <img src="../<?php echo htmlspecialchars($artwork['image_path']); ?>"
+                                                 alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                                 style="width: 100%; height: 100%; object-fit: cover;">
                                         </div>
-                                        
-                                        <div class="card-body">
-                                            <h5 class="card-title product-name"><?php echo htmlspecialchars($artwork['title']); ?></h5>
-                                            <p class="product-scent"><?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?></p>
-                                            <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Location:</strong> <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
-                                            </p>
-                                            
-                                            <div class="product-actions" style="margin-top: 1rem;">
-                                                <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%;">View Details</a>
-                                            </div>
+                                    <?php endif; ?>
+
+                                    <div class="card-header">
+                                        <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
+                                        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                                            by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
+                                        </p>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <p><?php echo htmlspecialchars($artwork['description'] ?? 'No description available'); ?></p>
+
+                                        <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                            <span class="location-badge"><?php echo htmlspecialchars(ucfirst($artwork['type'])); ?></span>
+                                            <span class="location-badge"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></span>
                                         </div>
+
+                                        <p class="text-muted">
+                                            <strong>Location:</strong><br>
+                                            <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
+                                            <?php if (!empty($artwork['floor'])): ?> - <?php echo htmlspecialchars($artwork['floor']); ?><?php endif; ?>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Details</a>
                                     </div>
                                 </div>
                                 <?php
                             }
                         } else {
-                            echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">No artworks currently available.</div>';
+                            echo '<div class="no-data" style="grid-column: 1/-1;"><p>No artworks currently available.</p></div>';
                         }
                     } catch (Exception $e) {
-                        echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">Unable to load artworks.</div>';
+                        echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load artworks.</p></div>';
                     }
                     ?>
                 </div>
@@ -178,14 +183,14 @@ include 'includes/header.php';
 
         <!-- Guided Tours Section -->
         <section id="guided-tours" class="py-5">
-            <div class="container text-center">
+            <div class="container">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="mb-0">Guided Tours</h2>
+                    <h2 class="section-title mb-0">Guided Tours</h2>
                     <a href="tours.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
                 </div>
                 <p class="section-subtitle">Experience expert-led tours through our most spectacular exhibits.</p>
                 
-                <div class="products-grid">
+                <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT t.tour_id, t.title, t.description, t.tour_date, 
@@ -205,49 +210,45 @@ include 'includes/header.php';
                                 $available = $tour['max_capacity'] - $tour['current_bookings'];
                                 $capacity_percent = ($tour['current_bookings'] / $tour['max_capacity']) * 100;
                                 ?>
-                                <div class="product-item">
-                                    <div class="card shadow-sm product-card">
-                                        <div style="position: relative; overflow: hidden; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--smoky-oak) 0%, var(--btn-bg) 100%); min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2rem;">
-                                            <div style="color: var(--text-light); text-align: center;">
-                                                <h4 style="margin: 0; font-size: 1.1rem;">📅 <?php echo date('M d, Y', strtotime($tour['tour_date'])); ?></h4>
-                                                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">⏰ <?php echo date('g:i A', strtotime($tour['start_time'])); ?></p>
-                                            </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><?php echo htmlspecialchars($tour['title']); ?></h3>
+                                        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                                            Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?>
+                                        </p>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><?php echo htmlspecialchars($tour['description'] ?? 'No description available'); ?></p>
+                                        
+                                        <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                            <span class="location-badge"><?php echo date('M d, Y', strtotime($tour['tour_date'])); ?></span>
+                                            <span class="location-badge"><?php echo date('g:i A', strtotime($tour['start_time'])); ?></span>
                                         </div>
                                         
-                                        <div class="card-body">
-                                            <h5 class="card-title product-name"><?php echo htmlspecialchars($tour['title']); ?></h5>
-                                            <p class="product-scent">Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?></p>
-                                            <p style="color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                <strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?>
-                                            </p>
-                                            
-                                            <!-- Capacity Bar -->
-                                            <div class="capacity-info" style="margin: 0.5rem 0;">
-                                                <div class="capacity-bar">
-                                                    <div class="capacity-fill" style="width: <?php echo min($capacity_percent, 100); ?>%; background: linear-gradient(90deg, var(--primary-light), #ffd89b);">
-                                                        <?php if ($capacity_percent > 10) echo $tour['current_bookings'] . '/' . $tour['max_capacity']; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="product-actions" style="margin-top: 1rem;">
-                                                <a href="tours.php?id=<?php echo $tour['tour_id']; ?>" class="btn btn-dark btn-sm" style="width: 100%; margin-bottom: 0.5rem;">Book Tour</a>
-                                                <?php if ($available > 0): ?>
-                                                    <span class="card-badge" style="display: inline-block; width: 100%; color: white;"><?php echo $available; ?> Spots Available</span>
-                                                <?php else: ?>
-                                                    <span class="card-badge" style="display: inline-block; width: 100%; color: white;">Tour Full</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
+                                        <p class="text-muted">
+                                            <strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?>
+                                        </p>
+                                        
+                                        <p class="text-muted" style="margin-top: 0.5rem;">
+                                            <strong>Availability:</strong>
+                                            <?php if ($available > 0): ?>
+                                                <span style="color: green;"><?php echo $available; ?> spots available</span>
+                                            <?php else: ?>
+                                                <span style="color: red;">Tour Full</span>
+                                            <?php endif; ?>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="tours.php?id=<?php echo $tour['tour_id']; ?>" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Book Tour</a>
                                     </div>
                                 </div>
                                 <?php
                             }
                         } else {
-                            echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">No tours currently available.</div>';
+                            echo '<div class="no-data" style="grid-column: 1/-1;"><p>No tours currently available.</p></div>';
                         }
                     } catch (Exception $e) {
-                        echo '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">Unable to load tours.</div>';
+                        echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load tours.</p></div>';
                     }
                     ?>
                 </div>

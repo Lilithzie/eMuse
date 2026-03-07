@@ -77,29 +77,28 @@ $cartCount  = array_sum($_SESSION['cart']);
     </form>
 
     <!-- Products Grid -->
-    <div class="products-grid">
+    <div class="cards-grid">
         <?php foreach ($products as $p): ?>
-        <div class="product-item">
-            <div class="card shadow-sm product-card">
+        <div class="card">
             <?php if (!empty($p['image_path'])): ?>
-            <div style="overflow: hidden; border-radius: 12px 12px 0 0; min-height: 200px;">
-                <img src="../<?= htmlspecialchars($p['image_path']) ?>" alt="<?= htmlspecialchars($p['name']) ?>" style="width:100%;height:200px;object-fit:cover;">
+            <div class="card-image" style="height: 200px; overflow: hidden; border-radius: 8px 8px 0 0;">
+                <img src="../<?= htmlspecialchars($p['image_path']) ?>" alt="<?= htmlspecialchars($p['name']) ?>" style="width:100%;height:100%;object-fit:cover;">
             </div>
-            <?php else: ?>
-            <div style="overflow: hidden; border-radius: 12px 12px 0 0; background:linear-gradient(135deg,var(--primary-accent),#ffe0b2);min-height:200px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🛍️</div>
             <?php endif; ?>
+            <div class="card-header">
+                <h3><?= htmlspecialchars($p['name']) ?></h3>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;"><?= htmlspecialchars($p['category'] ?? '') ?></p>
+            </div>
             <div class="card-body">
-                <h3 class="card-title product-name" style="font-size:1rem;"><?= htmlspecialchars($p['name']) ?></h3>
-                <p class="product-scent" style="font-size:.85rem;color:#666;"><?= htmlspecialchars($p['category'] ?? '') ?></p>
                 <?php if ($p['description']): ?>
-                <p style="font-size:.85rem;color:#555;margin-top:.5rem;"><?= htmlspecialchars(substr($p['description'],0,80)) ?>…</p>
+                <p><?= htmlspecialchars(substr($p['description'],0,100)) ?>...</p>
                 <?php endif; ?>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;">
-                    <span style="font-size:1.2rem;font-weight:700;color:var(--primary-dark);">₱<?= number_format($p['price'],2) ?></span>
-                    <span style="font-size:.8rem;color:<?= $p['stock_quantity']<=5?'#c62828':'#666' ?>;"><?= $p['stock_quantity'] ?> in stock</span>
+                <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                    <span class="location-badge">₱<?= number_format($p['price'],2) ?></span>
+                    <span class="location-badge" style="<?= $p['stock_quantity']<=5?'background:#ffebee;color:#c62828;':'' ?>"><?= $p['stock_quantity'] ?> in stock</span>
                 </div>
             </div>
-            <div class="card-footer product-actions" style="margin-top:1rem;">
+            <div class="card-footer">
                 <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
                     <a href="login.php" class="btn btn-secondary" style="width:100%;padding:.5rem;text-align:center;text-decoration:none;">Login to Purchase</a>
                 <?php else: ?>
@@ -111,11 +110,10 @@ $cartCount  = array_sum($_SESSION['cart']);
                 </form>
                 <?php endif; ?>
             </div>
-            </div>
         </div>
         <?php endforeach; ?>
         <?php if (!$products): ?>
-        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;">No products found.</div>
+        <div class="no-data" style="grid-column:1/-1;"><p>No products found.</p></div>
         <?php endif; ?>
     </div>
 </div>
