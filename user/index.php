@@ -8,7 +8,7 @@ include 'includes/header.php';
         <div class="hero-inner">
             <div>
                 <h1>Welcome to eMuse</h1>
-                <h3> ______________________________________________________</h3>
+                <div class="hero-divider"></div>
                 <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you're visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
                 <div class="hero-cta">
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
@@ -16,7 +16,7 @@ include 'includes/header.php';
                 </div>
             </div>
             <div class="hero-media">
-                <img src="../img/heroi.jpg" alt="eMuse Museum Hero" style="width: 80%; height: 100%; object-fit: cover">
+                <img src="../img/hero.jpg" alt="eMuse Museum Hero">
             </div>
         </div>
     </section>
@@ -39,22 +39,18 @@ include 'includes/header.php';
                     } catch (Exception $e) {}
                     ?>
                 </div>
-            </div>
-        </div>
     </section>
 
     <!-- Main Container -->
     <div class="container">
         <!-- Featured Exhibits Section -->
         <section id="featured-exhibits" class="py-5">
-            <div class="container">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="section-title mb-0">Featured Exhibits</h2>
-                    <a href="exhibits.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
-                </div>
-                <p class="section-subtitle">Explore our current and upcoming exhibitions curated by world-class experts.</p>
-                
-                <div class="cards-grid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title mb-0">Featured Exhibits</h2>
+                <a href="exhibits.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
+            </div>
+            <p class="section-subtitle">Explore our current and upcoming exhibitions curated by world-class experts.</p>
+            <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT e.exhibit_id, e.title, e.description, e.status, 
@@ -106,20 +102,17 @@ include 'includes/header.php';
                         echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load exhibits.</p></div>';
                     }
                     ?>
-                </div>
             </div>
         </section>
 
         <!-- Artifacts & Artworks Section -->
         <section id="popular-artworks" class="py-5">
-            <div class="container">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="section-title mb-0">Featured Artworks</h2>
-                    <a href="artworks.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
-                </div>
-                <p class="section-subtitle">Discover masterpieces from our extensive collection across all locations.</p>
-                
-                <div class="cards-grid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title mb-0">Featured Artworks</h2>
+                <a href="artworks.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
+            </div>
+            <p class="section-subtitle">Discover masterpieces from our extensive collection across all locations.</p>
+            <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
@@ -177,20 +170,17 @@ include 'includes/header.php';
                         echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load artworks.</p></div>';
                     }
                     ?>
-                </div>
             </div>
         </section>
 
         <!-- Guided Tours Section -->
         <section id="guided-tours" class="py-5">
-            <div class="container">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="section-title mb-0">Guided Tours</h2>
-                    <a href="tours.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
-                </div>
-                <p class="section-subtitle">Experience expert-led tours through our most spectacular exhibits.</p>
-                
-                <div class="cards-grid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title mb-0">Guided Tours</h2>
+                <a href="tours.php" class="btn btn-sm btn-outline-secondary">Browse All</a>
+            </div>
+            <p class="section-subtitle">Experience expert-led tours through our most spectacular exhibits.</p>
+            <div class="cards-grid">
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT t.tour_id, t.title, t.description, t.tour_date, 
@@ -251,7 +241,6 @@ include 'includes/header.php';
                         echo '<div class="no-data" style="grid-column: 1/-1;"><p>Unable to load tours.</p></div>';
                     }
                     ?>
-                </div>
             </div>
         </section>
 

@@ -283,7 +283,9 @@ CREATE TABLE IF NOT EXISTS product_sales (
     served_by       INT,
     notes           TEXT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (served_by) REFERENCES admin_users(admin_id)
+    user_id         INT NULL,
+    FOREIGN KEY (served_by) REFERENCES admin_users(admin_id),
+    FOREIGN KEY (user_id)   REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 -- Sale Items Table
@@ -340,8 +342,10 @@ CREATE TABLE IF NOT EXISTS visitor_feedback (
     responded_by      INT,
     responded_at      TIMESTAMP NULL,
     created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id           INT NULL,
     FOREIGN KEY (category_id)  REFERENCES feedback_categories(category_id),
-    FOREIGN KEY (responded_by) REFERENCES admin_users(admin_id)
+    FOREIGN KEY (responded_by) REFERENCES admin_users(admin_id),
+    FOREIGN KEY (user_id)      REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 -- Feedback Statistics Table
@@ -490,8 +494,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
 -- ============================================================
 
 -- Default super admin (password: admin123)
-INSERT INTO admin_users (username, password, full_name, email, role) VALUES
-('admin', '$2y$10$vk5lmCRFMdkvEA1.r7u6oe37a5XJs94A8z0XCfzhPSwBViw9Ke/Ou', 'System Administrator', 'admin@museum.com', 'super_admin');
+INSERT IGNORE INTO admin_users (username, password, full_name, email, role) VALUES
+('admin', '$2y$10$PeAD.QKrwF73UatnEU1TCewRCfIJ5Nu1xf0HtL6S2/0Ah6o9jbKbS', 'System Administrator', 'admin@museum.com', 'super_admin');
 
 -- Staff accounts (password: Staff@123)
 INSERT IGNORE INTO admin_users (username, password, full_name, email, role) VALUES
@@ -507,7 +511,7 @@ INSERT IGNORE INTO admin_users (username, password, full_name, email, role) VALU
 
 -- Sample regular visitor (password: user123)
 INSERT INTO users (username, password, full_name, email, phone, status) VALUES
-('user', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'John Visitor', 'john@email.com', '555-0100', 'active');
+('user', '$2y$10$JmFITJwQBM6.N2pNnDJW3usLYiovOI2yTkfBtM7xXegE4Wwk0XNF2', 'John Visitor', 'john@email.com', '555-0100', 'active');
 
 -- Exhibit classifications
 INSERT INTO exhibit_classifications (name, description) VALUES
@@ -594,7 +598,7 @@ INSERT IGNORE INTO promo_codes (code, discount_type, discount_value, valid_from,
 ('TOUR15',    'percentage', 15.00, '2026-03-01', '2026-09-30', 'tours',    'active'),
 ('SHOP20',    'percentage', 20.00, '2026-03-01', '2026-06-30', 'products', 'active');
 
-~~ Exhibits
+-- Exhibits
 INSERT INTO exhibits (title, description, classification_id, start_date, end_date, status) VALUES
 ('Egyptian Mummies', 'Ancient preserved mummies from Egypt', 1, '2026-04-01', '2026-06-01', 'upcoming'),
 ('Digital Art Gallery', 'Interactive modern digital artworks', 2, '2026-03-15', '2026-07-15', 'active'),

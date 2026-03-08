@@ -1,17 +1,25 @@
 <?php
 require '../config/database.php';
-include 'includes/header.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 $message = '';
 $message_type = '';
 
+// PRG: load flash message from session after redirect
+if (isset($_SESSION['tour_flash'])) {
+    $message      = $_SESSION['tour_flash']['msg'];
+    $message_type = $_SESSION['tour_flash']['type'];
+    unset($_SESSION['tour_flash']);
+}
+
+include 'includes/header.php';
+
 // Handle tour booking
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'book_tour') {
-    // Check if user is logged in
     if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
-        $message = 'Please login to book a tour.';
-        $message_type = 'error';
-    } else {
+        header('Location: login.php?redirect=tours.php&msg=tours');
+        exit;
+    }
     try {
         $tour_id = intval($_POST['tour_id']);
         $visitor_name = trim($_POST['visitor_name']);
@@ -38,28 +46,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $message_type = 'error';
             } else {
                 // Insert booking
-                $book_stmt = $pdo->prepare("INSERT INTO tour_bookings (tour_id, visitor_name, visitor_email, number_of_people) 
-                                          VALUES (?, ?, ?, ?)");
-                $book_stmt->execute([$tour_id, $visitor_name, $visitor_email, $num_people]);
+                $uid = $_SESSION['user_id'] ?? null;
+                $book_stmt = $pdo->prepare("INSERT INTO tour_bookings (tour_id, visitor_name, visitor_email, number_of_people, user_id) 
+                                          VALUES (?, ?, ?, ?, ?)");
+                $book_stmt->execute([$tour_id, $visitor_name, $visitor_email, $num_people, $uid]);
 
-                $message = 'Tour booked successfully! Confirmation has been sent to ' . htmlspecialchars($visitor_email) . '.';
-                $message_type = 'success';
+                $msg = 'Tour booked successfully! Confirmation has been sent to ' . htmlspecialchars($visitor_email) . '.';
+                $_SESSION['tour_flash'] = ['msg' => $msg, 'type' => 'success'];
+                header('Location: tours.php');
+                exit;
             }
         }
     } catch (Exception $e) {
         $message = 'An error occurred while booking the tour.';
         $message_type = 'error';
     }
-    }
 }
 
 // Handle tour cancellation
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'cancel_booking') {
-    // Check if user is logged in
     if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
-        $message = 'Please login to cancel a tour booking.';
-        $message_type = 'error';
-    } else {
+        header('Location: login.php?redirect=tours.php&msg=tours');
+        exit;
+    }
     try {
         $booking_id   = intval($_POST['booking_id']);
         $cancel_email = trim($_POST['cancel_email']);
@@ -74,34 +83,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $message = 'Cannot cancel a past tour booking.'; $message_type = 'error';
             } else {
                 $pdo->prepare("UPDATE tour_bookings SET status='cancelled' WHERE booking_id=?")->execute([$booking_id]);
-                $message = "Booking #{$booking_id} for '{$booking['title']}' has been cancelled."; $message_type = 'success';
+                $_SESSION['tour_flash'] = ['msg' => "Booking #{$booking_id} for '{$booking['title']}' has been cancelled.", 'type' => 'success'];
+                header('Location: tours.php');
+                exit;
             }
         }
     } catch (Exception $e) { $message = 'Error cancelling booking.'; $message_type = 'error'; }
-    }
 }
 
 $date_filter = isset($_GET['date']) ? trim($_GET['date']) : '';
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 ?>
 
+<!-- Page Banner -->
+<div class="page-hero">
+    <div class="page-hero-content">
+        <h1>Guided Tours</h1>
+        <p>Experience immersive, expert-led tours through our most captivating exhibits.</p>
+    </div>
+</div>
+
     <div class="container">
-        <!-- Page Title -->
-        <div style="margin-bottom: 2rem;">
-            <h1 class="section-title">Guided Tours</h1>
-            <p class="section-subtitle">Experience immersive, expert-led tours through our most captivating exhibits.</p>
+
+        <!-- Login notice overlay (shown briefly before redirecting) -->
+        <div id="login-notice" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:12px;padding:2.5rem 2rem;max-width:380px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+                <div style="font-size:2.5rem;margin-bottom:.75rem;">🗺️</div>
+                <h3 style="color:#2A3520;margin-bottom:.5rem;">Login Required</h3>
+                <p style="color:#555;margin-bottom:1.25rem;">You need to be logged in to book a tour.</p>
+                <div style="width:100%;height:4px;background:#eee;border-radius:4px;overflow:hidden;"><div style="height:100%;background:#3D4A2F;animation:nprogress 1.8s linear forwards;"></div></div>
+                <p style="color:#999;font-size:.8rem;margin-top:.75rem;">Redirecting to login…</p>
+            </div>
         </div>
 
+        <!-- Page Title removed - using page-hero banner above -->
+
         <!-- Message Display -->
-        <?php if ($message): ?>
-            <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; background-color: <?php echo ($message_type == 'success') ? '#d4edda' : '#f8d7da'; ?>; border-left: 4px solid <?php echo ($message_type == 'success') ? '#28a745' : '#dc3545'; ?>; color: <?php echo ($message_type == 'success') ? '#155724' : '#721c24'; ?>;">
+        <?php if ($message && $message_type !== 'success'): ?>
+            <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24;">
                 <?php echo htmlspecialchars($message); ?>
             </div>
+        <?php endif; ?>
+        <?php if ($message && $message_type === 'success'): ?>
+        <script>document.addEventListener('DOMContentLoaded',function(){showToast(<?= json_encode(htmlspecialchars($message)) ?>);});</script>
         <?php endif; ?>
 
         <!-- Filter Section -->
         <div class="filter-section">
-            <form method="GET" action="tours.php" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: flex-end;">
+            <form method="GET" action="tours.php">
                 <div class="filter-group">
                     <label for="date">Filter by Date:</label>
                     <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($date_filter); ?>">
@@ -216,20 +245,20 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 
                         <!-- Booking Form Modal -->
                         <?php if ($available > 0 && !$is_past): ?>
-                        <div id="bookingForm<?php echo $tour['tour_id']; ?>" style="display:none; margin-bottom: 2rem; padding: 2rem; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div id="bookingForm<?php echo $tour['tour_id']; ?>" style="display:none; margin-bottom: 2rem; padding: 2rem; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 8px; grid-column: 1 / -1;">
                             <h3 style="color: var(--primary-dark); margin-bottom: 1rem;">Book <?php echo htmlspecialchars($tour['title']); ?></h3>
-                            <form method="POST" action="tours.php">
+                            <form method="POST" action="tours.php" onsubmit="return requireLogin()">
                                 <input type="hidden" name="action" value="book_tour">
                                 <input type="hidden" name="tour_id" value="<?php echo $tour['tour_id']; ?>">
 
                                 <div class="form-group">
                                     <label for="visitor_name<?php echo $tour['tour_id']; ?>">Your Name:</label>
-                                    <input type="text" id="visitor_name<?php echo $tour['tour_id']; ?>" name="visitor_name" required>
+                                    <input type="text" id="visitor_name<?php echo $tour['tour_id']; ?>" name="visitor_name" required value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="visitor_email<?php echo $tour['tour_id']; ?>">Email Address:</label>
-                                    <input type="email" id="visitor_email<?php echo $tour['tour_id']; ?>" name="visitor_email" required>
+                                    <input type="email" id="visitor_email<?php echo $tour['tour_id']; ?>" name="visitor_email" required value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>">
                                 </div>
 
                                 <div class="form-group">
@@ -336,3 +365,19 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
     </div>
 
 <?php include 'includes/footer.php'; ?>
+<style>@keyframes nprogress{from{width:0}to{width:100%}}</style>
+<script>
+const IS_LOGGED_IN = <?= (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']) ? 'true' : 'false' ?>;
+function requireLogin() {
+    if (!IS_LOGGED_IN) {
+        showLoginNotice('login.php?redirect=tours.php&msg=tours');
+        return false;
+    }
+    return true;
+}
+function showLoginNotice(url) {
+    var el = document.getElementById('login-notice');
+    if (el) { el.style.display = 'flex'; setTimeout(function(){ window.location = url; }, 1800); }
+    else { window.location = url; }
+}
+</script>

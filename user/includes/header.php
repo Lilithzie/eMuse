@@ -55,6 +55,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <span class="nav-link nav-welcome" style="color: rgba(250,243,227,0.7); font-size:0.82rem; letter-spacing:0.5px; height:auto; padding:0; cursor:default;">
                         Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                     </span>
+                    <a href="my-account.php" class="nav-link nav-login <?php echo ($current_page == 'my-account.php') ? 'active' : ''; ?>">My Account</a>
                     <a href="logout.php" class="nav-link nav-login">Logout</a>
                 <?php else: ?>
                     <a href="login.php" class="nav-link nav-login <?php echo ($current_page == 'login.php') ? 'active' : ''; ?>">Login</a>

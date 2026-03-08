@@ -56,7 +56,7 @@ include 'includes/header.php';
                 <option value="exit"  <?= $filterType=='exit'?'selected':'' ?>>Exit</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="background:#1565c0;">Filter</button>
+        <button type="submit" class="btn btn-primary">Filter</button>
     </form>
 </div>
 

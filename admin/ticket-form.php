@@ -2,6 +2,10 @@
 require_once '../config/config.php';
 checkAuth();
 
+// Tickets are created by visitors via the user portal — redirect admin back.
+header('Location: tickets.php?notice=visitor_only');
+exit();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $visitor_name = sanitize($_POST['visitor_name']);
     $visitor_email = sanitize($_POST['visitor_email']);

@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ticket_code'])) {
                 $error = "This ticket was already scanned on " . formatDateTime($ticket['scanned_at']);
             } elseif ($ticket['status'] === 'cancelled') {
                 $error = "This ticket has been cancelled.";
+            } elseif ($ticket['status'] === 'pending') {
+                $error = "⚠ Payment not yet collected. Please ask the visitor to pay at the counter first, then mark the ticket as paid via Ticket Payments before scanning.";
             } else {
                 $error = "Ticket status: " . ucfirst($ticket['status']);
             }
@@ -70,16 +72,30 @@ include 'includes/header.php';
     <div class="card">
         <div class="card-header"><h3>Ticket Verifier</h3></div>
         <div style="padding:2rem;text-align:center;">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <p style="color:#666;margin-bottom:1.5rem;">Enter ticket code manually or scan with a barcode reader</p>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--chestnut-grove)" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <p style="color:#666;margin-bottom:1.5rem;">Enter ticket code manually, use a barcode reader, or scan with your camera</p>
 
             <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
             <?php if ($error):   ?><div class="alert alert-error"><?= $error ?></div><?php endif; ?>
 
-            <form method="POST" action="">
+            <!-- Camera QR Scanner -->
+            <div style="margin-bottom:1.5rem;">
+                <button type="button" id="startCamBtn" onclick="startCameraScanner()"
+                    class="btn btn-primary" style="margin-bottom:.75rem;">
+                    📷 Scan QR with Camera
+                </button>
+                <button type="button" id="stopCamBtn" onclick="stopCameraScanner()"
+                    class="btn btn-danger" style="display:none;margin-bottom:.75rem;">
+                    ✕ Stop Camera
+                </button>
+                <div id="qr-reader" style="width:100%;max-width:360px;margin:0 auto;display:none;border-radius:8px;overflow:hidden;"></div>
+                <div id="qr-result" style="margin-top:.5rem;font-size:.85rem;color:var(--chestnut-grove);"></div>
+            </div>
+
+            <form method="POST" action="" id="scanForm">
                 <div class="form-group" style="text-align:left;">
                     <label>Ticket Code *</label>
-                    <input type="text" name="ticket_code" placeholder="e.g. TK20260305..." required autofocus
+                    <input type="text" name="ticket_code" id="ticket_code_input" placeholder="e.g. TK20260305..." required autofocus
                            value="<?= isset($_POST['ticket_code']) ? htmlspecialchars(strtoupper(trim($_POST['ticket_code']))) : '' ?>"
                            style="text-transform:uppercase;font-size:1.1rem;letter-spacing:1px;">
                 </div>
@@ -90,7 +106,7 @@ include 'includes/header.php';
                         <option value="exit">Exit (Departure)</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;background:#1565c0;">
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:0.5rem;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                     Verify Ticket
                 </button>
@@ -151,3 +167,46 @@ include 'includes/header.php';
 </div>
 
 <?php include 'includes/footer.php'; ?>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+var html5QrCode = null;
+
+function startCameraScanner() {
+    document.getElementById('qr-reader').style.display = 'block';
+    document.getElementById('startCamBtn').style.display = 'none';
+    document.getElementById('stopCamBtn').style.display = 'inline-block';
+
+    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        function(decodedText) {
+            // Fill the input and auto-submit
+            var input = document.getElementById('ticket_code_input');
+            input.value = decodedText.toUpperCase().trim();
+            document.getElementById('qr-result').textContent = '✓ Scanned: ' + decodedText;
+            stopCameraScanner();
+            // Auto-submit after short delay
+            setTimeout(function() {
+                document.getElementById('scanForm').submit();
+            }, 400);
+        },
+        function(err) { /* scan errors are normal, ignore */ }
+    ).catch(function(err) {
+        document.getElementById('qr-result').textContent = 'Camera error: ' + err;
+        document.getElementById('startCamBtn').style.display = 'inline-block';
+        document.getElementById('stopCamBtn').style.display = 'none';
+        document.getElementById('qr-reader').style.display = 'none';
+    });
+}
+
+function stopCameraScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(function() {
+            document.getElementById('qr-reader').style.display = 'none';
+            document.getElementById('startCamBtn').style.display = 'inline-block';
+            document.getElementById('stopCamBtn').style.display = 'none';
+        }).catch(function() {});
+    }
+}
+</script>

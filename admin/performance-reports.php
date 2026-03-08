@@ -2,48 +2,74 @@
 require_once '../config/config.php';
 checkAuth();
 
-// Get date range
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
-$end_date = $_GET['end_date'] ?? date('Y-m-t');
+$end_date   = $_GET['end_date']   ?? date('Y-m-t');
 
-// Get performance metrics
-$stmt = $pdo->prepare("
-    SELECT * FROM performance_metrics
-    WHERE metric_date BETWEEN ? AND ?
-    ORDER BY metric_date ASC, metric_type
-");
-$stmt->execute([$start_date, $end_date]);
-$metrics = $stmt->fetchAll();
+// Days in selected period
+$days = max(1, (int)(new DateTime($start_date))->diff(new DateTime($end_date))->days + 1);
 
-// Calculate KPIs
+// ── Raw figures from live tables ─────────────────────────────
+$s = $pdo->prepare("SELECT COUNT(*), COALESCE(SUM(amount_paid),0) FROM tickets WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used')");
+$s->execute([$start_date, $end_date]);
+[$totalVisitors, $ticketRev] = $s->fetch(PDO::FETCH_NUM);
+
+$s = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tour_bookings WHERE DATE(booking_date) BETWEEN ? AND ? AND status='confirmed'");
+$s->execute([$start_date, $end_date]);
+$tourRev = (float)$s->fetchColumn();
+
+$s = $pdo->prepare("SELECT COALESCE(SUM(total_amount),0) FROM product_sales WHERE sale_date BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$shopRev = (float)$s->fetchColumn();
+
+$s = $pdo->prepare("SELECT ROUND(AVG(rating),2) FROM visitor_feedback WHERE DATE(created_at) BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$avgRating = (float)$s->fetchColumn();
+
+$s = $pdo->prepare("SELECT COALESCE(AVG(b.cnt / t.max_capacity * 100), 0) FROM tours t LEFT JOIN (SELECT tour_id, COUNT(*) as cnt FROM tour_bookings WHERE status='confirmed' GROUP BY tour_id) b ON b.tour_id=t.tour_id WHERE t.tour_date BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$avgFillRate = (float)$s->fetchColumn();
+
+// ── Build KPI metric definitions ─────────────────────────────
+$raw_metrics = [
+    ['type'=>'Visitor Traffic',  'value'=>(float)$totalVisitors, 'target'=>$days*50.0,     'notes'=>'Confirmed visitors vs target (50/day)'],
+    ['type'=>'Ticket Revenue',   'value'=>(float)$ticketRev,    'target'=>$days*25000.0,  'notes'=>'Paid ticket revenue vs target (₱25,000/day)'],
+    ['type'=>'Tour Revenue',     'value'=>(float)$tourRev,      'target'=>$days*3000.0,   'notes'=>'Tour booking revenue vs target (₱3,000/day)'],
+    ['type'=>'Shop Revenue',     'value'=>(float)$shopRev,      'target'=>$days*5000.0,   'notes'=>'Shop sales vs target (₱5,000/day)'],
+    ['type'=>'Visitor Rating',   'value'=>$avgRating,           'target'=>4.0,            'notes'=>'Average feedback rating vs target (4.0/5.0)'],
+    ['type'=>'Tour Fill Rate',   'value'=>round($avgFillRate,1),'target'=>80.0,           'notes'=>'Avg tour capacity utilisation vs target (80%)'],
+];
+
+$metrics  = [];
 $kpi_data = [];
-foreach ($metrics as $metric) {
-    if (!isset($kpi_data[$metric['metric_type']])) {
-        $kpi_data[$metric['metric_type']] = [
-            'total_value' => 0,
-            'total_target' => 0,
-            'count' => 0,
-            'excellent' => 0,
-            'good' => 0,
-            'needs_improvement' => 0,
-            'critical' => 0
-        ];
+foreach ($raw_metrics as $m) {
+    $pct    = $m['target'] > 0 ? min(999, $m['value'] / $m['target'] * 100) : 0;
+    $status = $pct >= 100 ? 'excellent' : ($pct >= 75 ? 'good' : ($pct >= 50 ? 'needs_improvement' : 'critical'));
+    $metrics[] = [
+        'metric_date'  => $end_date,
+        'metric_type'  => $m['type'],
+        'metric_value' => $m['value'],
+        'target_value' => $m['target'],
+        'percentage'   => round($pct, 1),
+        'status'       => $status,
+        'notes'        => $m['notes'],
+    ];
+    if (!isset($kpi_data[$m['type']])) {
+        $kpi_data[$m['type']] = ['total_value'=>0,'total_target'=>0,'count'=>0,'excellent'=>0,'good'=>0,'needs_improvement'=>0,'critical'=>0];
     }
-    $kpi_data[$metric['metric_type']]['total_value'] += $metric['metric_value'];
-    $kpi_data[$metric['metric_type']]['total_target'] += $metric['target_value'];
-    $kpi_data[$metric['metric_type']]['count']++;
-    $kpi_data[$metric['metric_type']][$metric['status']]++;
+    $kpi_data[$m['type']]['total_value']  += $m['value'];
+    $kpi_data[$m['type']]['total_target'] += $m['target'];
+    $kpi_data[$m['type']]['count']++;
+    $kpi_data[$m['type']][$status]++;
 }
 
-// Overall performance score
-$total_metrics = count($metrics);
-$excellent_count = count(array_filter($metrics, fn($m) => $m['status'] == 'excellent'));
-$good_count = count(array_filter($metrics, fn($m) => $m['status'] == 'good'));
-$needs_improvement = count(array_filter($metrics, fn($m) => $m['status'] == 'needs_improvement'));
-$critical_count = count(array_filter($metrics, fn($m) => $m['status'] == 'critical'));
-
-$performance_score = $total_metrics > 0 ? 
-    (($excellent_count * 100 + $good_count * 75 + $needs_improvement * 50 + $critical_count * 25) / $total_metrics) : 0;
+$total_metrics     = count($metrics);
+$excellent_count   = count(array_filter($metrics, fn($m) => $m['status'] === 'excellent'));
+$good_count        = count(array_filter($metrics, fn($m) => $m['status'] === 'good'));
+$needs_improvement = count(array_filter($metrics, fn($m) => $m['status'] === 'needs_improvement'));
+$critical_count    = count(array_filter($metrics, fn($m) => $m['status'] === 'critical'));
+$performance_score = $total_metrics > 0
+    ? ($excellent_count*100 + $good_count*75 + $needs_improvement*50 + $critical_count*25) / $total_metrics
+    : 0;
 
 include 'includes/header.php';
 ?>

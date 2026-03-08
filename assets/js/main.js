@@ -111,7 +111,7 @@ function confirmDelete(message = 'Are you sure you want to delete this item?') {
 
 // Format currency
 function formatCurrency(amount) {
-    return '$' + parseFloat(amount).toFixed(2);
+    return '₱' + parseFloat(amount).toFixed(2);
 }
 
 // Format date

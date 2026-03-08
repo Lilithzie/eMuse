@@ -2,25 +2,62 @@
 require_once '../config/config.php';
 checkAuth();
 
-// Get date range
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
-$end_date = $_GET['end_date'] ?? date('Y-m-t');
+$end_date   = $_GET['end_date']   ?? date('Y-m-t');
 
-// Get revenue tracking data
-$stmt = $pdo->prepare("
-    SELECT * FROM revenue_tracking
-    WHERE transaction_date BETWEEN ? AND ?
-    ORDER BY transaction_date ASC, created_at ASC
+// ── Revenue totals from live tables ──────────────────────────
+$s = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tickets WHERE DATE(purchase_date) BETWEEN ? AND ? AND status IN ('confirmed','used')");
+$s->execute([$start_date, $end_date]);
+$ticket_revenue = (float)$s->fetchColumn();
+
+$s = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tour_bookings WHERE DATE(booking_date) BETWEEN ? AND ? AND status='confirmed'");
+$s->execute([$start_date, $end_date]);
+$tour_revenue = (float)$s->fetchColumn();
+
+$s = $pdo->prepare("SELECT COALESCE(SUM(total_amount),0) FROM product_sales WHERE sale_date BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$shop_revenue = (float)$s->fetchColumn();
+
+$other_revenue = 0;
+$total_revenue  = $ticket_revenue + $tour_revenue + $shop_revenue;
+
+// ── Unified transaction list (UNION of all 3 sources) ────────
+$s = $pdo->prepare("
+    SELECT DATE(purchase_date)          AS transaction_date,
+           'ticket'                     AS revenue_type,
+           amount_paid                  AS amount,
+           payment_method,
+           CONCAT(visitor_name, ' \u2013 ', UPPER(ticket_type), ' ticket') AS description
+    FROM tickets
+    WHERE DATE(purchase_date) BETWEEN ? AND ?
+      AND status IN ('confirmed','used') AND amount_paid > 0
+
+    UNION ALL
+
+    SELECT DATE(booking_date),
+           'tour',
+           amount_paid,
+           'online',
+           CONCAT(visitor_name, ' \u2013 tour booking')
+    FROM tour_bookings
+    WHERE DATE(booking_date) BETWEEN ? AND ?
+      AND status = 'confirmed' AND amount_paid > 0
+
+    UNION ALL
+
+    SELECT sale_date,
+           'shop',
+           total_amount,
+           payment_method,
+           CONCAT(IFNULL(customer_name,'Walk-in'), ' \u2013 shop sale')
+    FROM product_sales
+    WHERE sale_date BETWEEN ? AND ?
+
+    ORDER BY transaction_date DESC
+    LIMIT 300
 ");
-$stmt->execute([$start_date, $end_date]);
-$transactions = $stmt->fetchAll();
-
-// Calculate summary
-$total_revenue = array_sum(array_column($transactions, 'amount'));
-$ticket_revenue = array_sum(array_map(fn($t) => $t['revenue_type'] == 'ticket' ? $t['amount'] : 0, $transactions));
-$tour_revenue = array_sum(array_map(fn($t) => $t['revenue_type'] == 'tour' ? $t['amount'] : 0, $transactions));
-$shop_revenue = array_sum(array_map(fn($t) => $t['revenue_type'] == 'shop' ? $t['amount'] : 0, $transactions));
-$other_revenue = array_sum(array_map(fn($t) => in_array($t['revenue_type'], ['event', 'other']) ? $t['amount'] : 0, $transactions));
+$s->execute([$start_date,$end_date,$start_date,$end_date,$start_date,$end_date]);
+$transactions = $s->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -56,11 +93,8 @@ include 'includes/header.php';
 
 <div class="stats-grid" style="margin-bottom: 30px;">
     <div class="stat-card">
-        <div class="stat-icon" style="background: #e8f5e9;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
+        <div class="stat-icon" style="background: #e8f5e9; font-size: 1.55rem; font-weight: 800; color: #4caf50; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            ₱
         </div>
         <div class="stat-content">
             <h3><?php echo formatCurrency($total_revenue); ?></h3>

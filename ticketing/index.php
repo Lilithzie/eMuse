@@ -17,6 +17,9 @@ $stmt->execute([$today]); $todayScans = $stmt->fetchColumn();
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE visit_date=? AND status IN ('confirmed','used')");
 $stmt->execute([$today]); $todayTotal = $stmt->fetchColumn();
 
+// All pending payment (any date, unpaid)
+$awaitingPayment = $pdo->query("SELECT COUNT(*) FROM tickets WHERE status='pending'")->fetchColumn();
+
 // Recent scans
 $recentScans = $pdo->prepare("
     SELECT el.*, t.visitor_name, t.ticket_type, t.ticket_code, au.full_name as scanned_by_name
@@ -45,16 +48,16 @@ include 'includes/header.php';
         <div class="stat-content"><h3><?= $todayUsed ?></h3><p>Entered Today</p></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:#fff3e0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f57c00" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
-        </div>
-        <div class="stat-content"><h3><?= $todayPending ?></h3><p>Awaiting Entry</p></div>
-    </div>
-    <div class="stat-card">
         <div class="stat-icon" style="background:#e8f5e9;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#388e3c" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="stat-content"><h3><?= $todayScans ?></h3><p>QR Scans Today</p></div>
+        <div class="stat-content"><h3><?= $todayPending ?></h3><p>Paid / Awaiting Entry</p></div>
+    </div>
+    <div class="stat-card" style="cursor:pointer;" onclick="window.location='tickets.php'">
+        <div class="stat-icon" style="background:#fff8e1;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f57f17" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-content"><h3><?= $awaitingPayment ?></h3><p>Awaiting Payment</p></div>
     </div>
     <div class="stat-card">
         <div class="stat-icon" style="background:#fce4ec;">
@@ -64,12 +67,19 @@ include 'includes/header.php';
     </div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
     <a href="scanner.php" style="text-decoration:none;">
         <div class="stat-card" style="background:#1565c0;color:white;text-align:center;padding:2rem;cursor:pointer;">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <h3 style="margin:1rem 0 0.25rem;color:white;">Scan / Validate Ticket</h3>
             <p style="color:rgba(255,255,255,.7);margin:0;">Scan QR code or enter ticket code</p>
+        </div>
+    </a>
+    <a href="tickets.php" style="text-decoration:none;">
+        <div class="stat-card" style="background:#2e7d32;color:white;text-align:center;padding:2rem;cursor:pointer;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <h3 style="margin:1rem 0 0.25rem;color:white;">Ticket Payments</h3>
+            <p style="color:rgba(255,255,255,.7);margin:0;">Collect cash &amp; mark tickets paid</p>
         </div>
     </a>
     <a href="entry-log.php" style="text-decoration:none;">
