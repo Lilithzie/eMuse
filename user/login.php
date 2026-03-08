@@ -13,6 +13,8 @@ $noticeMessages = [
 $notice = isset($_GET['msg'], $noticeMessages[$_GET['msg']]) ? $noticeMessages[$_GET['msg']] : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $isAjax = isset($_POST['_ajax']) && $_POST['_ajax'] === '1';
+
     $username = sanitize($_POST['username']);
     $password = $_POST['password'];
     
@@ -32,6 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['admin_email']= $admin['email'];
         $_SESSION['user_type']  = 'staff';
         $authenticated = true;
+        if ($isAjax) {
+            $roleUrls = [
+                'super_admin'      => '../admin/index.php',
+                'admin'            => '../admin/index.php',
+                'ticketing_staff'  => '../ticketing/index.php',
+                'tour_guide'       => '../tourguide/index.php',
+                'maintenance_staff'=> '../maintenance/index.php',
+                'shop_staff'       => '../shop/index.php',
+                'manager'          => '../manager/index.php',
+            ];
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $roleUrls[$admin['role']] ?? 'index.php']);
+            exit();
+        }
         redirectByRole($admin['role']);
         exit();
     }
@@ -56,6 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Redirect to intended page or home
         $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'index.php';
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $redirect]);
+            exit();
+        }
         header('Location: ' . $redirect);
         exit();
     }
@@ -74,6 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'No account found with that username.';
         } else {
             $error = 'Incorrect password. Please try again.';
+        }
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => $error]);
+            exit();
         }
     }
 }
