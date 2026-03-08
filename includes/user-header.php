@@ -39,7 +39,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <!-- Auth actions -->
             <div class="nav-auth-group">
                 <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
-                    <span class="nav-link nav-welcome" style="color: rgba(250,243,227,0.7); font-size:0.82rem; letter-spacing:0.5px; height:auto; padding:0; cursor:default;">
+                    <span class="nav-link nav-welcome" style="color: var(--golden-sand); font-size:0.82rem; letter-spacing:0.5px; height:auto; padding:0; cursor:default;">
                         Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                     </span>
                     <a href="logout.php" class="nav-link nav-login">Logout</a>

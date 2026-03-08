@@ -149,23 +149,8 @@ include 'includes/header.php';
                                             by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
                                         </p>
                                     </div>
-
-                                    <div class="card-body">
-                                        <p><?php echo htmlspecialchars($artwork['description'] ?? 'No description available'); ?></p>
-
-                                        <div style="margin-top: 1rem; margin-bottom: 1rem;">
-                                            <span class="location-badge"><?php echo htmlspecialchars(ucfirst($artwork['type'])); ?></span>
-                                            <span class="location-badge"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></span>
-                                        </div>
-
-                                        <p class="text-muted">
-                                            <strong>Location:</strong><br>
-                                            <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
-                                            <?php if (!empty($artwork['floor'])): ?> - <?php echo htmlspecialchars($artwork['floor']); ?><?php endif; ?>
-                                        </p>
-                                    </div>
                                     <div class="card-footer">
-                                        <a href="artworks.php?id=<?php echo $artwork['artwork_id']; ?>" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Details</a>
+                                        <a href="artworks.php" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Details</a>
                                     </div>
                                 </div>
                                 <?php

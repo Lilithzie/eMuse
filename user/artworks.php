@@ -89,18 +89,15 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                         ?>
                         <div class="card">
                             <?php if (!empty($artwork['image_path'])): ?>
-                                <div class="card-image" style="height: 200px; overflow: hidden; border-radius: 8px 8px 0 0;">
+                                <div class="card-image">
                                     <img src="../<?php echo htmlspecialchars($artwork['image_path']); ?>"
-                                         alt="<?php echo htmlspecialchars($artwork['title']); ?>"
-                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                         alt="<?php echo htmlspecialchars($artwork['title']); ?>">
                                 </div>
                             <?php endif; ?>
 
                             <div class="card-header">
                                 <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
-                                <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
-                                    by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
-                                </p>
+                                <p>by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?></p>
                             </div>
 
                             <div class="card-body">
