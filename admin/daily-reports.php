@@ -2,23 +2,64 @@
 require_once '../config/config.php';
 checkAuth();
 
-// Get date range
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
-$end_date = $_GET['end_date'] ?? date('Y-m-t');
+$end_date   = $_GET['end_date']   ?? date('Y-m-t');
 
-// Get daily reports
-$stmt = $pdo->prepare("
-    SELECT * FROM daily_reports
-    WHERE report_date BETWEEN ? AND ?
-    ORDER BY report_date ASC
+// Build daily report rows directly from live transaction tables
+$s = $pdo->prepare("
+    SELECT
+        T.visit_date                                                           AS report_date,
+        T.total_visitors,
+        T.adult_tickets,
+        T.child_tickets,
+        T.senior_tickets,
+        T.student_tickets,
+        T.group_tickets,
+        T.ticket_rev + COALESCE(TB.tour_rev,0) + COALESCE(PS.shop_rev,0)     AS total_revenue,
+        COALESCE(TC.tours,0)                                                   AS tours_conducted,
+        FB.avg_rating                                                          AS average_rating
+    FROM (
+        SELECT
+            visit_date,
+            COUNT(*)                            AS total_visitors,
+            SUM(ticket_type='adult')            AS adult_tickets,
+            SUM(ticket_type='child')            AS child_tickets,
+            SUM(ticket_type='senior')           AS senior_tickets,
+            SUM(ticket_type='student')          AS student_tickets,
+            SUM(ticket_type='group')            AS group_tickets,
+            COALESCE(SUM(amount_paid),0)        AS ticket_rev
+        FROM tickets
+        WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used')
+        GROUP BY visit_date
+    ) T
+    LEFT JOIN (
+        SELECT DATE(booking_date) AS d, SUM(amount_paid) AS tour_rev
+        FROM tour_bookings WHERE DATE(booking_date) BETWEEN ? AND ? AND status='confirmed'
+        GROUP BY DATE(booking_date)
+    ) TB ON TB.d = T.visit_date
+    LEFT JOIN (
+        SELECT sale_date AS d, SUM(total_amount) AS shop_rev
+        FROM product_sales WHERE sale_date BETWEEN ? AND ?
+        GROUP BY sale_date
+    ) PS ON PS.d = T.visit_date
+    LEFT JOIN (
+        SELECT tour_date AS d, COUNT(*) AS tours
+        FROM tours WHERE tour_date BETWEEN ? AND ? AND status='completed'
+        GROUP BY tour_date
+    ) TC ON TC.d = T.visit_date
+    LEFT JOIN (
+        SELECT DATE(created_at) AS d, ROUND(AVG(rating),1) AS avg_rating
+        FROM visitor_feedback WHERE DATE(created_at) BETWEEN ? AND ?
+        GROUP BY DATE(created_at)
+    ) FB ON FB.d = T.visit_date
+    ORDER BY T.visit_date ASC
 ");
-$stmt->execute([$start_date, $end_date]);
-$reports = $stmt->fetchAll();
+$s->execute([$start_date,$end_date,$start_date,$end_date,$start_date,$end_date,$start_date,$end_date,$start_date,$end_date]);
+$reports = $s->fetchAll();
 
-// Calculate totals
 $total_visitors = array_sum(array_column($reports, 'total_visitors'));
-$total_revenue = array_sum(array_column($reports, 'total_revenue'));
-$avg_visitors = count($reports) > 0 ? $total_visitors / count($reports) : 0;
+$total_revenue  = array_sum(array_column($reports, 'total_revenue'));
+$avg_visitors   = count($reports) > 0 ? $total_visitors / count($reports) : 0;
 
 include 'includes/header.php';
 ?>

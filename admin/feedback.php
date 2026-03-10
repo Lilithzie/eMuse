@@ -357,13 +357,13 @@ function renderStars($rating) {
     padding: 15px;
     background: #e3f2fd;
     border-radius: 4px;
-    border-left: 3px solid #2196f3;
+    border-left: 3px solid var(--smoky-oak);
 }
 
 .admin-response strong {
     display: block;
     margin-bottom: 8px;
-    color: #1976d2;
+    color: var(--chestnut-grove);
 }
 
 .admin-response p {

@@ -1,13 +1,24 @@
 <?php
 require '../config/database.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']) {
+    header('Location: login.php?redirect=cart.php&msg=cart');
+    exit;
+}
+
+// PRG: load receipt from session after redirect
+$receipt = null;
+$message = ''; $message_type = '';
+if (isset($_SESSION['cart_receipt'])) {
+    $receipt      = $_SESSION['cart_receipt'];
+    $message      = $_SESSION['cart_message'] ?? '';
+    $message_type = 'success';
+    unset($_SESSION['cart_receipt'], $_SESSION['cart_message']);
+}
+
 include 'includes/header.php';
 
-if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-
-$message = ''; $message_type = ''; $receipt = null;
-
-// ── Remove item ────────────────────────────────────────────────────────────
 if (isset($_GET['remove'])) {
     unset($_SESSION['cart'][(int)$_GET['remove']]);
     header("Location: cart.php"); exit;
@@ -78,11 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     $totalAmount = max(0, $subtotal - $discountAmt);
 
                     // Insert sale header
+                    $uid = $_SESSION['user_id'] ?? null;
                     $pdo->prepare("INSERT INTO product_sales
-                        (sale_date, total_amount, payment_method, customer_name, customer_email, discount_amount, promo_code)
-                        VALUES (CURDATE(),?,?,?,?,?,?)")
+                        (sale_date, total_amount, payment_method, customer_name, customer_email, discount_amount, promo_code, user_id)
+                        VALUES (CURDATE(),?,?,?,?,?,?,?)")
                         ->execute([$totalAmount, $payment_method, $customer_name, $customer_email,
-                                   $discountAmt, $promo_code_str ?: null]);
+                                   $discountAmt, $promo_code_str ?: null, $uid]);
                     $sale_id = $pdo->lastInsertId();
 
                     // Insert line items & deduct stock
@@ -100,7 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                             ->execute([$promoRecord['promo_id']]);
                     }
 
-                    $receipt = [
+                    $_SESSION['cart'] = [];
+                    $_SESSION['cart_receipt'] = [
                         'sale_id'  => $sale_id,
                         'items'    => $cartItems,
                         'subtotal' => $subtotal,
@@ -111,9 +124,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                         'email'    => $customer_email,
                         'promo'    => $promo_code_str,
                     ];
-                    $_SESSION['cart'] = [];
-                    $message = "Order #$sale_id confirmed! Total paid: ₱" . number_format($totalAmount, 2) . ". Thank you, " . htmlspecialchars($customer_name) . "!";
-                    $message_type = 'success';
+                    $_SESSION['cart_message'] = "Order #$sale_id confirmed! Total paid: ₱" . number_format($totalAmount, 2) . ". Thank you, " . htmlspecialchars($customer_name) . "!";
+                    header('Location: cart.php');
+                    exit;
                 }
             }
         } catch (Exception $e) {
@@ -148,13 +161,13 @@ foreach ($_SESSION['cart'] as $pid => $qty) {
         <a href="shop.php" class="btn btn-secondary">← Continue Shopping</a>
     </div>
 
-    <?php if ($message && !$receipt): ?>
-    <div style="margin-bottom:1.5rem;padding:1rem;border-radius:4px;
-        background:<?= $message_type === 'success' ? '#d4edda' : '#f8d7da' ?>;
-        border-left:4px solid <?= $message_type === 'success' ? '#28a745' : '#dc3545' ?>;
-        color:<?= $message_type === 'success' ? '#155724' : '#721c24' ?>;">
+    <?php if ($message && !$receipt && $message_type !== 'success'): ?>
+    <div style="margin-bottom:1.5rem;padding:1rem;border-radius:4px;background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;">
         <?= htmlspecialchars($message) ?>
     </div>
+    <?php endif; ?>
+    <?php if ($message && !$receipt && $message_type === 'success'): ?>
+    <script>document.addEventListener('DOMContentLoaded',function(){showToast(<?= json_encode(htmlspecialchars($message)) ?>);});</script>
     <?php endif; ?>
 
     <?php if ($receipt): ?>

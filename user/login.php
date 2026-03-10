@@ -4,6 +4,14 @@ require_once '../config/config.php';
 $error = '';
 $success = '';
 
+$noticeMessages = [
+    'tickets' => '🎫 Please log in to purchase tickets.',
+    'cart'    => '🛒 Please log in to view your cart.',
+    'shop'    => '🛍️ Please log in to access the souvenir shop.',
+    'tours'   => '🗺️ Please log in to book a guided tour.',
+];
+$notice = isset($_GET['msg'], $noticeMessages[$_GET['msg']]) ? $noticeMessages[$_GET['msg']] : '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = sanitize($_POST['username']);
     $password = $_POST['password'];
@@ -177,6 +185,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>Access Your Account</p>
         </div>
         
+        <?php if ($notice): ?>
+            <div style="background:#fff8e1;border:1px solid #f9a825;border-left:4px solid #f9a825;color:#5d4037;padding:.85rem 1rem;border-radius:6px;margin-bottom:1.25rem;font-size:.92rem;">
+                <?php echo $notice; ?>
+            </div>
+        <?php endif; ?>
+
         <?php if ($error): ?>
             <div class="alert alert-error"><?php echo $error; ?></div>
         <?php endif; ?>

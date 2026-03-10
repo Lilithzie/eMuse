@@ -7,16 +7,18 @@ $selected_exhibit = isset($_GET['exhibit']) ? intval($_GET['exhibit']) : 0;
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 ?>
 
-    <div class="container">
-        <!-- Page Title -->
-        <div style="margin-bottom: 2rem;">
-            <h1 class="section-title">Artifacts & Artworks</h1>
-            <p class="section-subtitle">Explore our extensive collection of masterpieces and historical artifacts by location and type.</p>
-        </div>
+<!-- Page Banner -->
+<div class="page-hero">
+    <div class="page-hero-content">
+        <h1>Artifacts &amp; Artworks</h1>
+        <p>Explore our extensive collection of masterpieces and historical artifacts.</p>
+    </div>
+</div>
 
+    <div class="container">
         <!-- Filter Section -->
         <div class="filter-section">
-            <form method="GET" action="artworks.php" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: flex-end;">
+            <form method="GET" action="artworks.php">
                 <div class="filter-group">
                     <label for="location">Filter by Location:</label>
                     <select id="location" name="location" onchange="this.form.submit();">

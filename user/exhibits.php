@@ -6,13 +6,15 @@ $selected_classification = isset($_GET['classification']) ? intval($_GET['classi
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 ?>
 
-    <div class="container">
-        <!-- Page Title -->
-        <div style="margin-bottom: 2rem;">
-            <h1 class="section-title">Explore Exhibits</h1>
-            <p class="section-subtitle">Discover our current and upcoming exhibitions from around the world.</p>
-        </div>
+<!-- Page Banner -->
+<div class="page-hero">
+    <div class="page-hero-content">
+        <h1>Explore Exhibits</h1>
+        <p>Discover our current and upcoming exhibitions from around the world.</p>
+    </div>
+</div>
 
+    <div class="container">
         <!-- Filter Section -->
         <div class="filter-section">
             <form method="GET" action="exhibits.php" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">

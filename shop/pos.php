@@ -165,7 +165,7 @@ include 'includes/header.php';
         </table>
         <div style="margin-top:1rem;display:flex;gap:.75rem;">
             <button onclick="window.print()" class="btn btn-secondary">🖨 Print Receipt</button>
-            <a href="pos.php" class="btn btn-primary" style="background:#bf360c;">New Sale</a>
+            <a href="pos.php" class="btn btn-primary">New Sale</a>
         </div>
     </div>
 </div>
@@ -198,7 +198,7 @@ include 'includes/header.php';
                             <input type="number" name="item_qty[]" min="1" value="1" class="form-control qty-input" onchange="recalcTotal()">
                         </div>
                         <div style="padding-bottom:.2rem;">
-                            <button type="button" onclick="removeRow(this)" class="btn btn-sm" style="background:#c62828;color:white;">✕</button>
+                            <button type="button" onclick="removeRow(this)" class="btn btn-danger btn-sm">✕</button>
                         </div>
                     </div>
                 </div>
@@ -234,7 +234,7 @@ include 'includes/header.php';
                     <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
                 </div>
 
-                <button type="submit" name="submit_sale" class="btn btn-primary" style="background:#bf360c;width:100%;font-size:1.1rem;padding:.85rem;">
+                <button type="submit" name="submit_sale" class="btn btn-primary btn-block" style="font-size:1.05rem;padding:.85rem;">
                     💳 Process Sale
                 </button>
             </form>

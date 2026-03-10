@@ -215,7 +215,7 @@ include 'includes/header.php';
 
 .total-section h2 {
     margin: 0;
-    color: #1976d2;
+    color: var(--chestnut-grove);
 }
 </style>
 

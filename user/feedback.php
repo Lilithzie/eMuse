@@ -27,11 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
         } elseif ($overall_rating < 1 || $overall_rating > 5) {
             $message = 'Rating must be between 1 and 5.'; $message_type = 'error';
         } else {
+            $uid = $_SESSION['user_id'] ?? null;
             $pdo->prepare("
                 INSERT INTO visitor_feedback
-                    (visitor_name, visitor_email, visit_date, rating, exhibition_rating, staff_rating, facilities_rating, feedback_text, category_id, status)
-                VALUES (?,?,?,?,?,?,?,?,?,'pending')
-            ")->execute([$visitor_name, $visitor_email, $visit_date ?: null, $overall_rating, $exhibition_rating ?: null, $staff_rating ?: null, $facilities_rating ?: null, $comments ?: '', $category_id]);
+                    (visitor_name, visitor_email, visit_date, rating, exhibition_rating, staff_rating, facilities_rating, feedback_text, category_id, status, user_id)
+                VALUES (?,?,?,?,?,?,?,?,?,'pending',?)
+            ")->execute([$visitor_name, $visitor_email, $visit_date ?: null, $overall_rating, $exhibition_rating ?: null, $staff_rating ?: null, $facilities_rating ?: null, $comments ?: '', $category_id, $uid]);
             $message = 'Thank you for your feedback, ' . htmlspecialchars($visitor_name) . '! We appreciate your input.';
             $message_type = 'success';
         }
@@ -56,16 +57,23 @@ $testimonials = $pdo->query("
 $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(exhibition_rating),1) as avg_exhibit, ROUND(AVG(staff_rating),1) as avg_staff, ROUND(AVG(facilities_rating),1) as avg_facilities, COUNT(*) as total FROM visitor_feedback")->fetch();
 ?>
 
-    <div class="container">
-        <div style="margin-bottom:2rem;">
-            <h1 class="section-title">Share Your Feedback</h1>
-            <p class="section-subtitle">Your experience matters to us. Help us improve by sharing what you loved and what we can do better.</p>
-        </div>
+<!-- Page Banner -->
+<div class="page-hero">
+    <div class="page-hero-content">
+        <h1>Share Your Feedback</h1>
+        <p>Your experience matters to us. Help us improve by sharing what you loved and what we can do better.</p>
+    </div>
+</div>
 
-        <?php if ($message): ?>
-        <div style="margin-bottom:1.5rem;padding:1rem;border-radius:4px;background:<?= $message_type=='success'?'#d4edda':'#f8d7da' ?>;border-left:4px solid <?= $message_type=='success'?'#28a745':'#dc3545' ?>;color:<?= $message_type=='success'?'#155724':'#721c24' ?>;">
+    <div class="container">
+
+        <?php if ($message && $message_type !== 'success'): ?>
+        <div style="margin-bottom:1.5rem;padding:1rem;border-radius:4px;background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;">
             <?= htmlspecialchars($message) ?>
         </div>
+        <?php endif; ?>
+        <?php if ($message && $message_type === 'success'): ?>
+        <script>document.addEventListener('DOMContentLoaded',function(){showToast(<?= json_encode(htmlspecialchars($message)) ?>);});</script>
         <?php endif; ?>
 
         <!-- Avg ratings strip -->
@@ -96,11 +104,11 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
                 <form method="POST">
                     <div class="form-group">
                         <label>Full Name *</label>
-                        <input type="text" name="visitor_name" required placeholder="Your name">
+                        <input type="text" name="visitor_name" required placeholder="Your name" value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>">
                     </div>
                     <div class="form-group">
                         <label>Email *</label>
-                        <input type="email" name="visitor_email" required placeholder="your@email.com">
+                        <input type="email" name="visitor_email" required placeholder="your@email.com" value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>">
                     </div>
                     <div class="form-group">
                         <label>Visit Date</label>

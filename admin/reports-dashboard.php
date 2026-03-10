@@ -2,57 +2,106 @@
 require_once '../config/config.php';
 checkAuth();
 
-// Get date range
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
-$end_date = $_GET['end_date'] ?? date('Y-m-t');
+$end_date   = $_GET['end_date']   ?? date('Y-m-t');
 
-// Get summary statistics
-$stmt = $pdo->prepare("
-    SELECT 
-        SUM(total_visitors) as total_visitors,
-        SUM(total_revenue) as total_revenue,
-        AVG(average_rating) as avg_rating,
-        SUM(tours_conducted) as total_tours
-    FROM daily_reports
-    WHERE report_date BETWEEN ? AND ?
-");
-$stmt->execute([$start_date, $end_date]);
-$summary = $stmt->fetch();
+// ── Visitors (confirmed/used tickets in visit_date range) ────
+$s = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used')");
+$s->execute([$start_date, $end_date]);
+$total_visitors = (int)$s->fetchColumn();
 
-// Get ticket breakdown
-$ticketBreakdown = $pdo->prepare("
-    SELECT 
-        SUM(adult_tickets) as adult,
-        SUM(child_tickets) as child,
-        SUM(senior_tickets) as senior,
-        SUM(student_tickets) as student,
-        SUM(group_tickets) as groups
-    FROM daily_reports
-    WHERE report_date BETWEEN ? AND ?
-");
-$ticketBreakdown->execute([$start_date, $end_date]);
-$tickets = $ticketBreakdown->fetch();
+// ── Revenue by source ────────────────────────────────────────
+$s = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tickets WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used')");
+$s->execute([$start_date, $end_date]);
+$ticket_rev = (float)$s->fetchColumn();
 
-// Get revenue breakdown
-$revenueBreakdown = $pdo->prepare("
-    SELECT 
-        SUM(ticket_revenue) as ticket_revenue,
-        SUM(tour_revenue) as tour_revenue,
-        SUM(shop_revenue) as shop_revenue
-    FROM daily_reports
-    WHERE report_date BETWEEN ? AND ?
-");
-$revenueBreakdown->execute([$start_date, $end_date]);
-$revenue = $revenueBreakdown->fetch();
+$s = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tour_bookings WHERE DATE(booking_date) BETWEEN ? AND ? AND status='confirmed'");
+$s->execute([$start_date, $end_date]);
+$tour_rev = (float)$s->fetchColumn();
 
-// Get daily data for chart
-$dailyData = $pdo->prepare("
-    SELECT * FROM daily_reports
-    WHERE report_date BETWEEN ? AND ?
-    ORDER BY report_date ASC
+$s = $pdo->prepare("SELECT COALESCE(SUM(total_amount),0) FROM product_sales WHERE sale_date BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$shop_rev = (float)$s->fetchColumn();
+
+$total_revenue = $ticket_rev + $tour_rev + $shop_rev;
+
+// ── Average rating ───────────────────────────────────────────
+$s = $pdo->prepare("SELECT ROUND(AVG(rating),1) FROM visitor_feedback WHERE DATE(created_at) BETWEEN ? AND ?");
+$s->execute([$start_date, $end_date]);
+$avg_rating = $s->fetchColumn();
+
+// ── Tours conducted ──────────────────────────────────────────
+$s = $pdo->prepare("SELECT COUNT(*) FROM tours WHERE tour_date BETWEEN ? AND ? AND status='completed'");
+$s->execute([$start_date, $end_date]);
+$total_tours = (int)$s->fetchColumn();
+
+$summary = [
+    'total_visitors' => $total_visitors,
+    'total_revenue'  => $total_revenue,
+    'avg_rating'     => $avg_rating,
+    'total_tours'    => $total_tours,
+];
+
+// ── Ticket type breakdown ────────────────────────────────────
+$s = $pdo->prepare("SELECT ticket_type, COUNT(*) as cnt FROM tickets WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used') GROUP BY ticket_type");
+$s->execute([$start_date, $end_date]);
+$typeRows = [];
+foreach ($s->fetchAll() as $r) $typeRows[$r['ticket_type']] = (int)$r['cnt'];
+$tickets = [
+    'adult'   => $typeRows['adult']   ?? 0,
+    'child'   => $typeRows['child']   ?? 0,
+    'senior'  => $typeRows['senior']  ?? 0,
+    'student' => $typeRows['student'] ?? 0,
+    'groups'  => $typeRows['group']   ?? 0,
+];
+
+// ── Revenue breakdown array ───────────────────────────────────
+$revenue = [
+    'ticket_revenue' => $ticket_rev,
+    'tour_revenue'   => $tour_rev,
+    'shop_revenue'   => $shop_rev,
+];
+
+// ── Daily trends ─────────────────────────────────────────────
+$s = $pdo->prepare("
+    SELECT
+        T.visit_date            AS report_date,
+        T.visitors              AS total_visitors,
+        T.ticket_rev + COALESCE(TB.tour_rev,0) + COALESCE(PS.shop_rev,0) AS total_revenue,
+        COALESCE(TC.tours,0)    AS tours_conducted,
+        FB.avg_rating           AS average_rating
+    FROM (
+        SELECT visit_date,
+               COUNT(*) AS visitors,
+               COALESCE(SUM(amount_paid),0) AS ticket_rev
+        FROM tickets
+        WHERE visit_date BETWEEN ? AND ? AND status IN ('confirmed','used')
+        GROUP BY visit_date
+    ) T
+    LEFT JOIN (
+        SELECT DATE(booking_date) AS d, SUM(amount_paid) AS tour_rev
+        FROM tour_bookings WHERE DATE(booking_date) BETWEEN ? AND ? AND status='confirmed'
+        GROUP BY DATE(booking_date)
+    ) TB ON TB.d = T.visit_date
+    LEFT JOIN (
+        SELECT sale_date AS d, SUM(total_amount) AS shop_rev
+        FROM product_sales WHERE sale_date BETWEEN ? AND ?
+        GROUP BY sale_date
+    ) PS ON PS.d = T.visit_date
+    LEFT JOIN (
+        SELECT tour_date AS d, COUNT(*) AS tours
+        FROM tours WHERE tour_date BETWEEN ? AND ? AND status='completed'
+        GROUP BY tour_date
+    ) TC ON TC.d = T.visit_date
+    LEFT JOIN (
+        SELECT DATE(created_at) AS d, ROUND(AVG(rating),1) AS avg_rating
+        FROM visitor_feedback WHERE DATE(created_at) BETWEEN ? AND ?
+        GROUP BY DATE(created_at)
+    ) FB ON FB.d = T.visit_date
+    ORDER BY T.visit_date ASC
 ");
-$dailyData->execute([$start_date, $end_date]);
-$daily = $dailyData->fetchAll();
+$s->execute([$start_date,$end_date,$start_date,$end_date,$start_date,$end_date,$start_date,$end_date,$start_date,$end_date]);
+$daily = $s->fetchAll();
 
 include 'includes/header.php';
 ?>

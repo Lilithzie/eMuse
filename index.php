@@ -123,7 +123,7 @@ include 'includes/user-header.php';
                     <?php
                     try {
                         $stmt = $pdo->prepare("SELECT a.artwork_id, a.title, a.artist, a.type, a.year_created, 
-                                             l.name as location, l.floor,  a.image_path, a.condition_status
+                                             l.name as location, l.floor, a.description, a.image_path, a.condition_status
                                              FROM artworks a 
                                              LEFT JOIN locations l ON a.location_id = l.location_id
                                              ORDER BY a.artwork_id 
@@ -136,18 +136,23 @@ include 'includes/user-header.php';
                                 ?>
                                 <div class="card">
                                     <?php if (!empty($artwork['image_path'])): ?>
-                                        <div class="card-image">
+                                        <div class="card-image" style="height: 200px; overflow: hidden; border-radius: 8px 8px 0 0;">
                                             <img src="<?php echo htmlspecialchars($artwork['image_path']); ?>"
-                                                 alt="<?php echo htmlspecialchars($artwork['title']); ?>">
+                                                 alt="<?php echo htmlspecialchars($artwork['title']); ?>"
+                                                 style="width: 100%; height: 100%; object-fit: cover;">
                                         </div>
                                     <?php endif; ?>
 
                                     <div class="card-header">
                                         <h3><?php echo htmlspecialchars($artwork['title']); ?></h3>
-                                        <p>by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?></p>
+                                        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                                            by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
+                                        </p>
                                     </div>
 
                                     <div class="card-body">
+                                        <p><?php echo htmlspecialchars($artwork['description'] ?? 'No description available'); ?></p>
+
                                         <div style="margin-top: 1rem; margin-bottom: 1rem;">
                                             <span class="location-badge"><?php echo htmlspecialchars(ucfirst($artwork['type'])); ?></span>
                                             <span class="location-badge"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></span>
