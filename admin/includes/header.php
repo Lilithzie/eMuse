@@ -18,7 +18,7 @@
     <div class="admin-layout">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>eMuse</h2>
+                <img src="../img/emuse-logo.png" alt="eMuse Logo" style="max-width:140px; height:auto; display:block; margin: 0 auto 6px auto;">
                 <p>Admin Panel</p>
             </div>
             
@@ -70,15 +70,7 @@
                     </svg>
                     Tickets
                 </a>
-                <a href="qr-scanner.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'qr-scanner.php' ? 'active' : ''; ?>">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/>
-                        <rect x="14" y="3" width="7" height="7"/>
-                        <rect x="14" y="14" width="7" height="7"/>
-                        <rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    QR Scanner
-                </a>
+
                 
                 <div class="nav-section">Tour Management</div>
                 <a href="tours.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'tours.php' ? 'active' : ''; ?>">
@@ -233,11 +225,8 @@
                 </div>
                 <div class="top-bar-right">
                     <div class="user-info">
-                        <div class="user-details">
-                            <span><?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
-                            <span class="user-role"><?php echo ucfirst(str_replace('_', ' ', $_SESSION['admin_role'])); ?></span>
-                        </div>
-                        <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['admin_name'], 0, 1)); ?></div>
+                        <span><?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
+                        <span class="user-role"><?php echo ucwords(strtoupper(str_replace('_', ' ', $_SESSION['admin_role']))); ?></span>
                     </div>
                 </div>
             </header>

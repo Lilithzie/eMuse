@@ -7,7 +7,7 @@ include 'includes/header.php';
     <section class="hero">
         <div class="hero-inner">
             <div>
-                <h1>Welcome to eMuse</h1>
+                <h1>Welcome to <?php echo MUSEUM_NAME; ?></h1>
                 <div class="hero-divider"></div>
                 <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you're visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
                 <div class="hero-cta">
@@ -33,7 +33,7 @@ include 'includes/header.php';
                         
                         if ($classifications) {
                             foreach ($classifications as $class) {
-                                echo '<a href="exhibits.php?classification=' . $class['classification_id'] . '" title="' . htmlspecialchars($class['name']) . '" style="display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 80px; background: linear-gradient(135deg, var(--btn-bg) 0%, var(--smoky-oak) 100%); color: var(--text-light); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; text-align: center; padding: 1rem; transition: all 0.3s; margin: 0.5rem;">' . htmlspecialchars($class['name']) . '</a>';
+                                echo '<a href="exhibits.php?classification=' . $class['classification_id'] . '" title="' . htmlspecialchars($class['name']) . '" style="display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 80px; background: var(--btn-bg); color: var(--text-light); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; text-align: center; padding: 1rem; transition: all 0.3s; margin: 0.5rem;">' . htmlspecialchars($class['name']) . '</a>';
                             }
                         }
                     } catch (Exception $e) {}
@@ -76,9 +76,7 @@ include 'includes/header.php';
                                         </p>
                                     </div>
                                     <div class="card-body">
-                                        <p><?php echo htmlspecialchars($exhibit['description'] ?? 'No description available'); ?></p>
-                                        
-                                        <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                        <div style="margin-top: 0.5rem; margin-bottom: 1rem;">
                                             <span class="location-badge"><?php echo $status_text; ?></span>
                                             <span class="location-badge"><?php echo htmlspecialchars($exhibit['classification'] ?? 'General'); ?></span>
                                         </div>
@@ -142,8 +140,21 @@ include 'includes/header.php';
                                             by <?php echo htmlspecialchars($artwork['artist'] ?? 'Unknown Artist'); ?>
                                         </p>
                                     </div>
+
+                                    <div class="card-body">
+                                        <div style="margin-top: 0.5rem; margin-bottom: 1rem;">
+                                            <span class="location-badge"><?php echo htmlspecialchars(ucfirst($artwork['type'])); ?></span>
+                                            <span class="location-badge"><?php echo htmlspecialchars($artwork['year_created'] ?? 'Date Unknown'); ?></span>
+                                        </div>
+
+                                        <p class="text-muted">
+                                            <strong>Location:</strong><br>
+                                            <?php echo htmlspecialchars($artwork['location'] ?? 'TBA'); ?>
+                                            <?php if (!empty($artwork['floor'])): ?> - <?php echo htmlspecialchars($artwork['floor']); ?><?php endif; ?>
+                                        </p>
+                                    </div>
                                     <div class="card-footer">
-                                        <a href="artworks.php" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Details</a>
+                                        <a href="artworks.php" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Explore More</a>
                                     </div>
                                 </div>
                                 <?php
@@ -243,3 +254,4 @@ include 'includes/header.php';
     </div>
 
 <?php include 'includes/footer.php'; ?>
+                                        

@@ -1,8 +1,6 @@
 <?php
 require_once '../config/config.php';
-if (!empty($_SESSION['admin_logged_in']) && in_array($_SESSION['admin_role'], ['super_admin','admin'])) {
-    header('Location: index.php'); exit();
-}
+if (!empty($_SESSION['admin_logged_in'])) { header('Location: index.php'); exit(); }
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$username]);
     $admin = $stmt->fetch();
     if ($admin && password_verify($password, $admin['password'])) {
-        if (!in_array($admin['role'], ['super_admin', 'admin'])) {
-            $error = 'This portal is for Administrators only.';
+        if ($admin['role'] !== 'tour_guide') {
+            $error = 'This portal is for Tour Guides only.';
         } else {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_id']        = $admin['admin_id'];
@@ -31,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eMuse — Admin Login</title>
+    <title>eMuse — Tour Guide Login</title>
     <link rel="stylesheet" href="../assets/css/style.css?v=<?= @filemtime('../assets/css/style.css') ?>">
     <style>
         body { background:var(--bg-color); display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
@@ -45,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <div class="login-box">
     <img src="../img/emuse-logo.png" alt="eMuse Logo">
-    <h2>Admin Panel</h2>
+    <h2>Tour Guide Portal</h2>
     <p class="subtitle">Sign in to your account</p>
     <?php if ($error): ?><div class="alert alert-error" style="margin-bottom:1rem;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <form method="POST">

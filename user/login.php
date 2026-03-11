@@ -12,7 +12,21 @@ $noticeMessages = [
 ];
 $notice = isset($_GET['msg'], $noticeMessages[$_GET['msg']]) ? $noticeMessages[$_GET['msg']] : '';
 
+// Redirect direct GET visits — login is now handled via the side panel
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!empty($_SESSION['user_logged_in'])) {
+        header('Location: my-account.php');
+        exit();
+    }
+    $redirect = 'index.php?panel=login';
+    if (!empty($_GET['msg'])) $redirect .= '&msg=' . urlencode($_GET['msg']);
+    header('Location: ' . $redirect);
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $isAjax = isset($_POST['_ajax']) && $_POST['_ajax'] === '1';
+
     $username = sanitize($_POST['username']);
     $password = $_POST['password'];
     
@@ -24,15 +38,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin = $stmt->fetch();
     
     if ($admin && password_verify($password, $admin['password'])) {
-        // Staff / admin login successful
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id']   = $admin['admin_id'];
-        $_SESSION['admin_name'] = $admin['full_name'];
-        $_SESSION['admin_role'] = $admin['role'];
-        $_SESSION['admin_email']= $admin['email'];
-        $_SESSION['user_type']  = 'staff';
+        // Staff / admin login — redirect to their portal's own login page
+        // (portal login pages use isolated named sessions)
+        $portalLogins = [
+            'super_admin'      => '../admin/login.php',
+            'admin'            => '../admin/login.php',
+            'ticketing_staff'  => '../ticketing/login.php',
+            'tour_guide'       => '../tourguide/login.php',
+            'maintenance_staff'=> '../maintenance/login.php',
+            'shop_staff'       => '../shop/login.php',
+            'manager'          => '../manager/login.php',
+        ];
+        $portalUrl = $portalLogins[$admin['role']] ?? 'index.php';
         $authenticated = true;
-        redirectByRole($admin['role']);
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $portalUrl]);
+            exit();
+        }
+        header('Location: ' . $portalUrl);
         exit();
     }
     
@@ -56,6 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Redirect to intended page or home
         $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'index.php';
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $redirect]);
+            exit();
+        }
         header('Location: ' . $redirect);
         exit();
     }
@@ -74,6 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'No account found with that username.';
         } else {
             $error = 'Incorrect password. Please try again.';
+        }
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => $error]);
+            exit();
         }
     }
 }

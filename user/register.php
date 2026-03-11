@@ -3,8 +3,20 @@ require_once '../config/config.php';
 
 $error = '';
 $success = '';
+$isAjax = false;
+
+// Redirect direct GET visits — registration is now handled via the side panel
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!empty($_SESSION['user_logged_in'])) {
+        header('Location: my-account.php');
+        exit();
+    }
+    header('Location: index.php?panel=register');
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $isAjax = isset($_POST['_ajax']) && $_POST['_ajax'] === '1';
     $username = sanitize($_POST['username']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
@@ -48,6 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+}
+
+if ($isAjax) {
+    header('Content-Type: application/json');
+    if ($success) {
+        echo json_encode(['success' => true, 'message' => 'Registration successful! You can now log in.']);
+    } else {
+        echo json_encode(['success' => false, 'error' => $error]);
+    }
+    exit();
 }
 ?>
 <?php include 'includes/header.php'; ?>

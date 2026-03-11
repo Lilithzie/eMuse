@@ -89,7 +89,7 @@ function starRating(int $n): string {
     border:2px dashed #ddd; border-radius:8px;
 }
 .profile-card {
-    background:linear-gradient(135deg,var(--chestnut-grove),var(--cocoa-bark));
+    background: var(--chestnut-grove);
     color:var(--cream-harvest); border-radius:12px; padding:2rem;
     display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap;
 }

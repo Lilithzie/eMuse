@@ -1,11 +1,23 @@
 <?php
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
+    // Isolate sessions per portal so multiple staff roles can be open simultaneously
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if     (str_contains($uri, '/admin/'))       session_name('emuse_admin');
+    elseif (str_contains($uri, '/ticketing/'))   session_name('emuse_tick');
+    elseif (str_contains($uri, '/tourguide/'))   session_name('emuse_guide');
+    elseif (str_contains($uri, '/maintenance/')) session_name('emuse_maint');
+    elseif (str_contains($uri, '/shop/'))        session_name('emuse_shop');
+    elseif (str_contains($uri, '/manager/'))     session_name('emuse_mgr');
+    // else: default PHPSESSID for the user/visitor portal
     session_start();
 }
 
 // Site Configuration
 define('SITE_NAME', 'eMuse - Museum Management');
+if (!defined('MUSEUM_NAME')) {
+    define('MUSEUM_NAME', 'Museum');
+}
 define('SITE_URL', 'http://localhost/eMuse');
 
 // Timezone
@@ -17,7 +29,7 @@ require_once __DIR__ . '/database.php';
 // Authentication check function - Admin / Super Admin only
 function checkAuth() {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ' . SITE_URL . '/user/login.php');
+        header('Location: ' . SITE_URL . '/admin/login.php');
         exit();
     }
     // Only super_admin and admin can access the full admin panel
@@ -30,7 +42,17 @@ function checkAuth() {
 // Auth check for any staff role
 function checkStaffAuth($required_role = null) {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ' . SITE_URL . '/user/login.php');
+        // Redirect to each portal's own isolated login page
+        $portalLogins = [
+            'emuse_admin' => SITE_URL . '/admin/login.php',
+            'emuse_tick'  => SITE_URL . '/ticketing/login.php',
+            'emuse_guide' => SITE_URL . '/tourguide/login.php',
+            'emuse_maint' => SITE_URL . '/maintenance/login.php',
+            'emuse_shop'  => SITE_URL . '/shop/login.php',
+            'emuse_mgr'   => SITE_URL . '/manager/login.php',
+        ];
+        $loginUrl = $portalLogins[session_name()] ?? SITE_URL . '/user/login.php';
+        header('Location: ' . $loginUrl);
         exit();
     }
     if ($required_role !== null) {

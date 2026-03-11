@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 <div class="page-hero">
     <div class="page-hero-content">
         <h1>Book Your Visit</h1>
-        <p>Purchase tickets and plan your unforgettable eMuse Museum experience.</p>
+        <p>Purchase tickets and plan your unforgettable <?php echo MUSEUM_NAME; ?> experience.</p>
     </div>
 </div>
 
@@ -225,7 +225,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
                     <div class="form-group">
                         <label for="visit_date">Visit Date *</label>
-                        <input type="date" id="visit_date" name="visit_date" min="<?php echo date('Y-m-d'); ?>" required>
+                        <div class="date-input-wrap">
+                            <input type="date" id="visit_date" name="visit_date" min="<?php echo date('Y-m-d'); ?>" required>
+                            <button type="button" class="date-icon-btn" onclick="this.previousElementSibling.showPicker()" title="Pick date">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">

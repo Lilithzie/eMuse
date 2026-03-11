@@ -231,7 +231,7 @@ foreach ($_SESSION['cart'] as $pid => $qty) {
                     $prod = $ci['product'];
                 ?>
                 <div style="display:flex;gap:1rem;align-items:center;border:1px solid #eee;border-radius:8px;padding:1rem;margin-bottom:1rem;background:white;">
-                    <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--primary-accent),#ffe0b2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">
+                    <div style="width:60px;height:60px;background:var(--primary-accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">
                         <?php if (!empty($prod['image_path'])): ?>
                         <img src="../<?= htmlspecialchars($prod['image_path']) ?>" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
                         <?php else: ?>🛍️<?php endif; ?>

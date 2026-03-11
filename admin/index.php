@@ -39,13 +39,23 @@ include 'includes/header.php';
 ?>
 
 <div class="dashboard">
-    <div class="page-header">
-        <h1>Dashboard</h1>
-        <span style="font-size:13px;color:var(--color-text-secondary);font-weight:500;"><?php echo date('l, F j, Y'); ?></span>
+    <!-- Welcome Banner -->
+    <div class="dash-welcome">
+        <div class="dash-welcome-text">
+            <h1>Good <?php
+                $h = (int)date('H');
+                echo $h < 12 ? 'Morning' : ($h < 17 ? 'Afternoon' : 'Evening');
+            ?>, <?php echo htmlspecialchars(explode(' ', $_SESSION['admin_name'])[0]); ?></h1>
+            <p><?php echo date('l, F j, Y'); ?> &mdash; Here's what's happening at eMuse today.</p>
+        </div>
+        <div class="dash-welcome-actions">
+            <a href="ticket-form.php" class="btn btn-primary">+ New Ticket</a>
+            <a href="tour-form.php" class="btn btn-secondary">+ New Tour</a>
+        </div>
     </div>
-    
+
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" style="--card-accent:#10b981;">
             <div class="stat-icon" style="background:rgba(16,185,129,0.12);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
                     <rect x="2" y="7" width="20" height="15" rx="2"/>
@@ -58,7 +68,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <div class="stat-card">
+        <div class="stat-card" style="--card-accent:#3b82f6;">
             <div class="stat-icon" style="background:rgba(59,130,246,0.12);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -73,7 +83,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <div class="stat-card">
+        <div class="stat-card" style="--card-accent:#f59e0b;">
             <div class="stat-icon" style="background:rgba(245,158,11,0.12);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
                     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
@@ -85,7 +95,7 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <div class="stat-card">
+        <div class="stat-card" style="--card-accent:#C4A35A;">
             <div class="stat-icon" style="background:rgba(196,163,90,0.12);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
@@ -98,10 +108,42 @@ include 'includes/header.php';
             </div>
         </div>
     </div>
-    
+
+    <!-- Quick Actions -->
+    <div class="dash-quick-actions">
+        <span class="dash-qa-label">Quick Actions</span>
+        <a href="exhibits.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Exhibits
+        </a>
+        <a href="artworks.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/></svg>
+            Artworks
+        </a>
+        <a href="tickets.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Tickets
+        </a>
+        <a href="tours.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Tours
+        </a>
+        <a href="staff.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Staff
+        </a>
+        <a href="reports-dashboard.php" class="dash-qa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Reports
+        </a>
+    </div>
+
     <div class="dashboard-grid">
         <div class="dashboard-section">
-            <h2>Recent Tickets</h2>
+            <div class="dash-section-header">
+                <h2>Recent Tickets</h2>
+                <a href="tickets.php" class="dash-view-all">View All &rarr;</a>
+            </div>
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
@@ -127,17 +169,28 @@ include 'includes/header.php';
         </div>
         
         <div class="dashboard-section">
-            <h2>Upcoming Tours</h2>
+            <div class="dash-section-header">
+                <h2>Upcoming Tours</h2>
+                <a href="tours.php" class="dash-view-all">View All &rarr;</a>
+            </div>
             <div class="tour-list">
-                <?php foreach ($toursList as $tour): ?>
+                <?php foreach ($toursList as $tour):
+                    $booked = (int)$tour['current_bookings'];
+                    $max    = (int)$tour['max_capacity'];
+                    $pct    = $max > 0 ? min(100, round($booked / $max * 100)) : 0;
+                    $barColor = $pct >= 90 ? '#ef4444' : ($pct >= 60 ? '#f59e0b' : '#10b981');
+                ?>
                 <div class="tour-item">
-                    <h4><?php echo $tour['title']; ?></h4>
-                    <p class="tour-guide">Guide: <?php echo $tour['guide_name'] ?? 'Not assigned'; ?></p>
+                    <h4><?php echo htmlspecialchars($tour['title']); ?></h4>
+                    <p class="tour-guide">Guide: <?php echo htmlspecialchars($tour['guide_name'] ?? 'Not assigned'); ?></p>
                     <p class="tour-time">
-                        <?php echo formatDate($tour['tour_date']); ?> at 
+                        <?php echo formatDate($tour['tour_date']); ?> at
                         <?php echo date('g:i A', strtotime($tour['start_time'])); ?>
                     </p>
-                    <p class="tour-capacity"><?php echo $tour['current_bookings']; ?> / <?php echo $tour['max_capacity']; ?> booked</p>
+                    <div class="tour-cap-row">
+                        <div class="tour-cap-bar"><div class="tour-cap-fill" style="width:<?php echo $pct; ?>%;background:<?php echo $barColor; ?>"></div></div>
+                        <span class="tour-cap-label"><?php echo $booked; ?> / <?php echo $max; ?></span>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>

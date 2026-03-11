@@ -20,7 +20,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <div class="admin-layout">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h2>eMuse</h2>
+            <img src="../img/emuse-logo.png" alt="eMuse Logo" style="max-width:140px;height:auto;display:block;margin:0 auto 6px auto;">
             <p>Ticketing Staff</p>
         </div>
         <nav class="sidebar-nav">

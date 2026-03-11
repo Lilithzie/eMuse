@@ -1,18 +1,9 @@
 <?php
-session_start();
-
-// Clear all session variables
-$_SESSION = array();
-
-// Destroy the session cookie
+require_once '../config/config.php';
+$_SESSION = [];
 if (isset($_COOKIE[session_name()])) {
     setcookie(session_name(), '', time()-3600, '/');
 }
-
-// Destroy the session
 session_destroy();
-
-// Redirect to unified login page
-header('Location: ../login.php');
+header('Location: login.php');
 exit();
-?>
