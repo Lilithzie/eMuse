@@ -15,7 +15,7 @@ include 'includes/header.php';
                 <p>A place where stories live and creativity thrives. Our museum invites you to explore unique exhibits, discover cultural treasures, and experience art and history up close. Whether you're visiting for learning, inspiration, or enjoyment, we are here to make your journey memorable through engaging displays, guided tours, and welcoming spaces.</p>
                 <div class="hero-cta">
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
-                    <a href="tickets.php" class="btn btn-outline-primary btn-lg">Book Your Visit</a>
+                    <a href="tickets.php" class="btn btn-outline-primary btn-lg" style="background-color: #ffffff00; color: white;">Book Your Visit</a>
                 </div>
             </div>
         </div>

@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS tours (
 -- Tour Bookings Table
 CREATE TABLE IF NOT EXISTS tour_bookings (
     booking_id       INT PRIMARY KEY AUTO_INCREMENT,
+    booking_code     VARCHAR(20) UNIQUE,
     tour_id          INT NOT NULL,
     ticket_id        INT,
     visitor_name     VARCHAR(100) NOT NULL,
