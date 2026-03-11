@@ -35,7 +35,7 @@ include 'includes/header.php';
 
 <div class="page-header">
     <h1>Maintenance Dashboard</h1>
-    <p style="color:#666;">Welcome, <?= htmlspecialchars($_SESSION['admin_name']) ?>!</p>
+    <p style="color:#666;">Mabuhay, <?= htmlspecialchars($_SESSION['admin_name']) ?>!</p>
 </div>
 
 <div class="stats-grid" style="margin-bottom:2rem;">

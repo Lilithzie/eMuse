@@ -30,7 +30,7 @@ include 'includes/header.php';
 
 <div class="page-header">
     <h1>Guide Dashboard</h1>
-    <p style="color:#666;">Welcome back, <?= htmlspecialchars($_SESSION['admin_name']) ?>!</p>
+    <p style="color:#666;">Mabuhay, <?= htmlspecialchars($_SESSION['admin_name']) ?>!</p>
 </div>
 
 <?php if (!$guide): ?>

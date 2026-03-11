@@ -456,17 +456,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a href="feedback.php" class="nav-link <?php echo ($current_page == 'feedback.php') ? 'active' : ''; ?>">Feedback</a>
                 </li>
-                <?php if (isset($_SESSION['cart']) && array_sum($_SESSION['cart']) > 0): ?>
-                <li class="nav-item">
-                    <a href="cart.php" class="nav-link" style="background:var(--primary-dark);color:white;border-radius:4px;padding:.3rem .75rem;">
-                        🛒 <?= array_sum($_SESSION['cart']) ?>
-                    </a>
-                </li>
-                <?php endif; ?>
             </ul>
             <!-- Auth actions separated visually -->
             <div class="nav-auth-group">
                 <?php if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']): ?>
+                    <?php if (isset($_SESSION['cart']) && array_sum($_SESSION['cart']) > 0 && $current_page != 'cart.php'): ?>
+                    <a href="cart.php" class="nav-link" style="background:var(--primary-dark);color:white;border-radius:4px;padding:.3rem .75rem;margin-right:.5rem;">
+                        🛒 <?= array_sum($_SESSION['cart']) ?>
+                    </a>
+                    <?php endif; ?>
                     <span class="nav-link nav-welcome" style="color: var(--golden-sand); font-size:0.82rem; letter-spacing:0.5px; height:auto; padding:0; cursor:default;">
                         Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                     </span>

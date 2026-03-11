@@ -84,7 +84,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <div class="admin-layout">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <img src="../img/emuse-logo.png" alt="eMuse Logo" style="max-width:140px;height:auto;display:block;margin:0 auto 6px auto;">
+            <a href="index.php" style="display:block;">
+                <img src="../img/emuse-logo.png" alt="eMuse Logo" style="max-width:140px;height:auto;display:block;margin:0 auto 6px auto;">
+            </a>
             <p>Manager Portal</p>
         </div>
         <nav class="sidebar-nav">

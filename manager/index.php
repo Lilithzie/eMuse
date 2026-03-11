@@ -41,7 +41,7 @@ include 'includes/header.php';
 
 <div class="page-header">
     <h1>Manager Dashboard</h1>
-    <p style="color:#666;">Welcome, <?= htmlspecialchars($_SESSION['admin_name']) ?>! &nbsp;<?= date('l, F j, Y') ?></p>
+    <p style="color:#666;">Mabuhay, <?= htmlspecialchars($_SESSION['admin_name']) ?>! &nbsp;<?= date('l, F j, Y') ?></p>
 </div>
 
 <!-- Today -->

@@ -42,10 +42,7 @@ include 'includes/header.php';
     <!-- Welcome Banner -->
     <div class="dash-welcome">
         <div class="dash-welcome-text">
-            <h1>Good <?php
-                $h = (int)date('H');
-                echo $h < 12 ? 'Morning' : ($h < 17 ? 'Afternoon' : 'Evening');
-            ?>, <?php echo htmlspecialchars(explode(' ', $_SESSION['admin_name'])[0]); ?></h1>
+            <h1>Mabuhay, <?php echo htmlspecialchars($_SESSION['admin_name']); ?></h1>
             <p><?php echo date('l, F j, Y'); ?> &mdash; Here's what's happening at eMuse today.</p>
         </div>
         <div class="dash-welcome-actions">

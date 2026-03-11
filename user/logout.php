@@ -19,11 +19,7 @@ if (isset($_COOKIE[session_name()])) {
 // Destroy the session
 session_destroy();
 
-// Redirect based on user type
-if ($user_type === 'admin') {
-    header('Location: ../admin/login.php');
-} else {
-    header('Location: login.php');
-}
+// Redirect to homepage
+header('Location: ../index.php');
 exit();
 ?>

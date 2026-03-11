@@ -6,6 +6,9 @@ include 'includes/header.php';
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-inner">
+            <div class="hero-media">
+                <img src="../img/hero.jpg" alt="eMuse Museum Hero">
+            </div>
             <div>
                 <h1>Welcome to <?php echo MUSEUM_NAME; ?></h1>
                 <div class="hero-divider"></div>
@@ -14,9 +17,6 @@ include 'includes/header.php';
                     <a href="exhibits.php" class="btn btn-primary btn-lg">Explore Exhibits</a>
                     <a href="tickets.php" class="btn btn-outline-primary btn-lg">Book Your Visit</a>
                 </div>
-            </div>
-            <div class="hero-media">
-                <img src="../img/hero.jpg" alt="eMuse Museum Hero">
             </div>
         </div>
     </section>
