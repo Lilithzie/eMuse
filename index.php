@@ -1,7 +1,4 @@
-<?php
-require 'config/database.php';
-include 'includes/user-header.php';
-?>
+<?php header("Location: user/index.php"); exit(); ?>
 
     <!-- Hero Section -->
     <section class="hero">
