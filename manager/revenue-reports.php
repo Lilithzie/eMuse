@@ -50,12 +50,25 @@ $totalDisc = $ticketDisc + $shopDisc;
 include 'includes/header.php';
 ?>
 
+<!-- Print-only report header -->
+<div class="print-report-header">
+    <div>
+        <div class="museum-name">eMuse &mdash; Museum Management System</div>
+        <div class="report-subtitle">Revenue Reports &mdash; Breakdown by Category &amp; Date Range</div>
+    </div>
+    <div class="report-meta">
+        <div>Period: <strong><?= date('M j, Y', strtotime($dateFrom)) ?> &ndash; <?= date('M j, Y', strtotime($dateTo)) ?></strong></div>
+        <div>Generated: <?= date('F j, Y \a\t g:i A') ?></div>
+        <div>Prepared by: <strong><?= htmlspecialchars($_SESSION['admin_name']) ?></strong> &mdash; Manager</div>
+    </div>
+</div>
+
 <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
     <div>
         <h1>Revenue Reports</h1>
         <p style="color:#666;">Revenue breakdown by category and date range</p>
     </div>
-    <button onclick="window.print()" class="btn btn-secondary">🖨 Print / Export</button>
+    <button onclick="window.print()" class="btn btn-secondary no-print">🖨 Print / Export</button>
 </div>
 
 <form method="GET" class="card" style="padding:1.25rem;margin-bottom:1.5rem;">

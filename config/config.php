@@ -29,7 +29,7 @@ require_once __DIR__ . '/database.php';
 // Authentication check function - Admin / Super Admin only
 function checkAuth() {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ' . SITE_URL . '/admin/login.php');
+        header('Location: ' . SITE_URL . '/user/index.php?panel=login');
         exit();
     }
     // Only super_admin and admin can access the full admin panel
@@ -42,17 +42,8 @@ function checkAuth() {
 // Auth check for any staff role
 function checkStaffAuth($required_role = null) {
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        // Redirect to each portal's own isolated login page
-        $portalLogins = [
-            'emuse_admin' => SITE_URL . '/admin/login.php',
-            'emuse_tick'  => SITE_URL . '/ticketing/login.php',
-            'emuse_guide' => SITE_URL . '/tourguide/login.php',
-            'emuse_maint' => SITE_URL . '/maintenance/login.php',
-            'emuse_shop'  => SITE_URL . '/shop/login.php',
-            'emuse_mgr'   => SITE_URL . '/manager/login.php',
-        ];
-        $loginUrl = $portalLogins[session_name()] ?? SITE_URL . '/user/login.php';
-        header('Location: ' . $loginUrl);
+        // All staff log in through the main visitor portal
+        header('Location: ' . SITE_URL . '/user/index.php?panel=login');
         exit();
     }
     if ($required_role !== null) {

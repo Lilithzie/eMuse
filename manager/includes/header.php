@@ -14,70 +14,171 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         .nav-item:hover,.nav-item.active { background:rgba(255,255,255,.15); }
         .nav-section { color:rgba(255,255,255,.5); }
 
+        /* ── PRINT STYLES ─────────────────────────────────── */
+        .print-report-header { display: none; }
+
         @media print {
-            /* Hide all non-report UI */
+            /* ── Force print colours ── */
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* ── Page setup ── */
+            @page { size: A4 portrait; margin: 1.5cm 1.8cm; }
+
+            /* ── Hide navigatiion chrome only ── */
             .sidebar,
             .top-bar,
+            form[method="GET"],
+            .btn,
             .no-print,
-            .page-header .btn,
-            form[method="GET"] {
+            .page-header {
                 display: none !important;
             }
 
-            /* Remove sidebar offset so content fills full page */
-            .admin-layout {
-                display: block !important;
+            /* ── Reset layout ── */
+            body, html {
+                background: #fff !important;
+                font-size: 9.5pt;
+                font-family: "Segoe UI", Arial, sans-serif;
+                color: #111;
             }
-            .main-content {
-                margin-left: 0 !important;
+            .admin-layout { display: block !important; }
+            .main-content { margin-left: 0 !important; width: 100% !important; background: #fff !important; }
+            .content      { padding: 0 !important; }
+
+            /* ── Print-only report banner ── */
+            .print-report-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: flex-end;
+                border-bottom: 2.5pt solid #2a3520;
+                padding-bottom: 8pt;
+                margin-bottom: 16pt;
+            }
+            .print-report-header .museum-name {
+                font-size: 13pt;
+                font-weight: 800;
+                color: #2a3520;
+                line-height: 1.2;
+            }
+            .print-report-header .report-subtitle {
+                font-size: 9pt;
+                color: #555;
+                margin-top: 2pt;
+            }
+            .print-report-header .report-meta {
+                text-align: right;
+                font-size: 8.5pt;
+                color: #444;
+                line-height: 1.7;
+            }
+            .print-report-header .report-meta strong { color: #111; }
+
+            /* ── Collapse grid wrappers to vertical stack ── */
+            div[style*="display:grid"],
+            div[style*="display: grid"],
+            div[style*="grid-template-columns"] {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            /* ── Stats summary row ── */
+            .stats-grid {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0 !important;
+                margin-bottom: 14pt !important;
+                border: 1pt solid #ccc !important;
+                border-radius: 4pt !important;
+                overflow: hidden !important;
+            }
+            .stat-card {
+                flex: 1 1 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-right: 1pt solid #ddd !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+            }
+            .stat-card:last-child { border-right: none !important; }
+            .stat-card .stat-content { padding: 8pt 10pt !important; text-align: center !important; }
+            .stat-card .stat-content h3 { font-size: 14pt !important; font-weight: 700 !important; color: #2a3520 !important; margin: 0 0 2pt !important; }
+            .stat-card .stat-content p  { font-size: 7.5pt !important; color: #555 !important; margin: 0 !important; text-transform: uppercase; letter-spacing: 0.3px; }
+
+            /* ── Cards ── */
+            .card {
+                display: block !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: 1pt solid #ccc !important;
+                border-radius: 4pt !important;
+                margin-bottom: 12pt !important;
                 padding: 0 !important;
                 width: 100% !important;
                 background: #fff !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                transform: none !important;
+                transition: none !important;
             }
-            .content {
-                padding: 1.5rem !important;
+            .card:hover { transform: none !important; box-shadow: none !important; }
+            .card-header {
+                display: block !important;
+                background: #2a3520 !important;
+                border-bottom: none !important;
+                padding: 6pt 10pt !important;
+                color: #fff !important;
             }
-            body, html {
-                background: #fff !important;
+            .card-header h3 {
+                font-size: 9.5pt !important;
+                font-weight: 700 !important;
+                color: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                font-family: "Segoe UI", Arial, sans-serif !important;
             }
 
-            /* Clean up card styles for print */
-            .card {
-                box-shadow: none !important;
-                border: 1px solid #ccc !important;
-                page-break-inside: avoid;
-            }
-            .stat-card {
-                box-shadow: none !important;
-                border: 1px solid #ccc !important;
-            }
-            .stats-grid {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: .5rem !important;
+            /* ── Tables ── */
+            .data-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 8.5pt !important;
             }
             .data-table th {
-                background: #e0e0e0 !important;
-                color: #000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                background: #3d4f30 !important;
+                color: #fff !important;
+                padding: 5pt 8pt !important;
+                text-align: left;
+                font-size: 8pt !important;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            .data-table td {
+                padding: 4.5pt 8pt !important;
+                border-bottom: 0.5pt solid #e8e8e8 !important;
+                color: #111 !important;
+                vertical-align: middle;
+            }
+            .data-table tr:nth-child(even) td { background: #f9f9f9 !important; }
+            .data-table tfoot tr td {
+                background: #e8f5e9 !important;
+                font-weight: 700 !important;
+                color: #1b5e20 !important;
+                border-top: 1pt solid #a5d6a7 !important;
             }
 
-            /* Print header with report title and date */
-            .print-header {
-                display: block !important;
-            }
-
-            /* Force page title visible */
-            .page-header {
-                margin-bottom: 1rem !important;
-            }
-
-            a[href]::after { content: none !important; }
+            /* ── Misc ── */
+            a::after { content: none !important; }
+            a { text-decoration: none !important; color: inherit !important; }
         }
-
-        /* Hidden on screen, shown on print */
-        .print-header { display: none; }
     </style>
 </head>
 <body>

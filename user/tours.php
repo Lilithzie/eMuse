@@ -200,49 +200,53 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                         $tour_date = new DateTime($tour['tour_date']);
                         $is_past = $tour_date < new DateTime();
                         ?>
-                        <div class="card">
+                        <div class="card tour-card">
                             <div class="card-header">
                                 <h3><?php echo htmlspecialchars($tour['title']); ?></h3>
-                                <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
-                                    Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?>
-                                </p>
+                                <p>Led by: <?php echo htmlspecialchars($tour['guide_name'] ?? 'TBA'); ?></p>
                             </div>
                             <div class="card-body">
-                                <p><?php echo htmlspecialchars($tour['description']); ?></p>
+                                <p class="tour-desc"><?php echo htmlspecialchars($tour['description']); ?></p>
 
-                                <!-- Tour Details -->
-                                <div style="margin-top: 1rem; display:flex; flex-wrap:wrap; gap:.5rem; align-items:center;">
-                                    <span class="location-badge" style="background:var(--chestnut-grove);color:var(--cream-harvest);font-size:.82rem;">
-                                        📅 <?php echo date('M j, Y', strtotime($tour['tour_date'])); ?> · <?php echo date('g:i A', strtotime($tour['start_time'])); ?>
-                                    </span>
-                                    <?php if (!empty($tour['end_time'])): ?>
-                                    <span class="location-badge" style="font-size:.82rem;">ends <?php echo date('g:i A', strtotime($tour['end_time'])); ?></span>
-                                    <?php endif; ?>
+                                <div class="tour-meta">
+                                    <div class="tour-meta-row">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        <span><?php echo date('M j, Y', strtotime($tour['tour_date'])); ?></span>
+                                    </div>
+                                    <div class="tour-meta-row">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        <span><?php echo date('g:i A', strtotime($tour['start_time'])); ?>
+                                            <?php if (!empty($tour['end_time'])): ?>– <?php echo date('g:i A', strtotime($tour['end_time'])); ?><?php endif; ?>
+                                        </span>
+                                    </div>
+                                    <div class="tour-meta-row">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        <span>₱<?php echo number_format($tour['price'] ?? 0, 2); ?> per person</span>
+                                    </div>
+                                    <div class="tour-meta-row">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <?php if ($available > 0 && !$is_past): ?>
+                                            <span style="color:#2e7d32;font-weight:600;"><?php echo $available; ?> spots available</span>
+                                        <?php elseif ($is_past): ?>
+                                            <span style="color:#888;">Tour has ended</span>
+                                        <?php else: ?>
+                                            <span style="color:#c62828;font-weight:600;">Fully booked</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-
-                                <p style="margin-top:.9rem;"><strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?></p>
-
-                                <!-- Availability -->
-                                <p style="margin-top:.4rem;font-weight:600;color:<?php echo $available > 0 ? '#2e7d32' : '#c62828'; ?>">
-                                    <strong>Availability:</strong> <?php echo $available > 0 ? $available.' spots available' : 'Fully Booked'; ?>
-                                </p>
                             </div>
                             <div class="card-footer">
                                 <?php if ($available > 0 && !$is_past): ?>
-                                    <span class="card-badge" style="background-color: #4CAF50; color: white;">Available</span>
                                     <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
-                                        <a href="login.php" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration:none;" onclick="openAuthPanel('login'); return false;">
-                                            Login to Book
-                                        </a>
+                                        <a href="#" class="btn btn-primary btn-sm" onclick="openAuthPanel('login'); return false;">Login to Book</a>
                                     <?php else: ?>
-                                    <button onclick="document.getElementById('bookingForm<?php echo $tour['tour_id']; ?>').style.display='block'" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                        Book Now
-                                    </button>
+                                        <button onclick="document.getElementById('bookingForm<?php echo $tour['tour_id']; ?>').style.display='block'" class="btn btn-primary btn-sm">Book Now</button>
                                     <?php endif; ?>
+                                    <span class="tour-status-badge available">Available</span>
                                 <?php elseif ($is_past): ?>
-                                    <span class="card-badge" style="background-color: #999; color: white;">Past Tour</span>
+                                    <span class="tour-status-badge past">Past Tour</span>
                                 <?php else: ?>
-                                    <span class="card-badge" style="background-color: #f44336; color: white;">Full</span>
+                                    <span class="tour-status-badge full">Fully Booked</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -369,7 +373,79 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
     </div>
 
 <?php include 'includes/footer.php'; ?>
-<style>@keyframes nprogress{from{width:0}to{width:100%}}</style>
+<style>
+/* ── Tour card refinements ── */
+.tour-card .card-header h3 {
+    font-size: 1.05rem;
+    line-height: 1.3;
+    margin: 0;
+}
+.tour-card .card-header p {
+    font-size: 0.82rem;
+    margin: 4px 0 0;
+    opacity: 0.85;
+}
+.tour-desc {
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.55;
+    margin: 0 0 1rem;
+    flex: none;
+}
+.tour-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    border-top: 1px solid rgba(109,96,83,0.1);
+    padding-top: 0.85rem;
+}
+.tour-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #444;
+}
+.tour-meta-row svg {
+    flex-shrink: 0;
+    opacity: 0.55;
+    stroke: var(--chestnut-grove, #3d2b1f);
+}
+.tour-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.tour-status-badge.available {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.tour-status-badge.past {
+    background: #f5f5f5;
+    color: #757575;
+    border: 1px solid #ddd;
+}
+.tour-status-badge.full {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+.btn-sm {
+    padding: 0.42rem 1rem !important;
+    font-size: 0.85rem !important;
+}
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+</style>
 <script>
 const IS_LOGGED_IN = <?= (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in']) ? 'true' : 'false' ?>;
 function requireLogin() {

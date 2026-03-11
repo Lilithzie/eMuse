@@ -38,26 +38,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin = $stmt->fetch();
     
     if ($admin && password_verify($password, $admin['password'])) {
-        // Staff / admin login — redirect to their portal's own login page
-        // (portal login pages use isolated named sessions)
-        $portalLogins = [
-            'super_admin'      => '../admin/login.php',
-            'admin'            => '../admin/login.php',
-            'ticketing_staff'  => '../ticketing/login.php',
-            'tour_guide'       => '../tourguide/login.php',
-            'maintenance_staff'=> '../maintenance/login.php',
-            'shop_staff'       => '../shop/login.php',
-            'manager'          => '../manager/login.php',
+        // Map each role to its isolated session name and dashboard URL
+        $portalMap = [
+            'super_admin'       => ['emuse_admin', SITE_URL . '/admin/index.php'],
+            'admin'             => ['emuse_admin', SITE_URL . '/admin/index.php'],
+            'ticketing_staff'   => ['emuse_tick',  SITE_URL . '/ticketing/index.php'],
+            'tour_guide'        => ['emuse_guide', SITE_URL . '/tourguide/index.php'],
+            'maintenance_staff' => ['emuse_maint', SITE_URL . '/maintenance/index.php'],
+            'shop_staff'        => ['emuse_shop',  SITE_URL . '/shop/index.php'],
+            'manager'           => ['emuse_mgr',   SITE_URL . '/manager/index.php'],
         ];
-        $portalUrl = $portalLogins[$admin['role']] ?? 'index.php';
-        $authenticated = true;
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'redirect' => $portalUrl]);
+
+        if (isset($portalMap[$admin['role']])) {
+            [$portalSessionName, $portalDashboard] = $portalMap[$admin['role']];
+
+            // Close the current visitor session, then open the portal's
+            // named session and write the auth variables into it directly.
+            // This means the staff member is fully logged in with a single
+            // sign-on and each portal cookie is independent.
+            session_write_close();
+            session_name($portalSessionName);
+            session_start();
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_id']        = $admin['admin_id'];
+            $_SESSION['admin_name']      = $admin['full_name'];
+            $_SESSION['admin_username']  = $admin['username'];
+            $_SESSION['admin_role']      = $admin['role'];
+            session_write_close();
+
+            $authenticated = true;
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => $portalDashboard]);
+                exit();
+            }
+            header('Location: ' . $portalDashboard);
             exit();
         }
-        header('Location: ' . $portalUrl);
-        exit();
     }
     
     // If not staff, try regular visitor
