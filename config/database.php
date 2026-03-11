@@ -5,6 +5,16 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'eMuse_db');
 
+// Museum display name (used across all user-facing pages)
+if (!defined('MUSEUM_NAME')) {
+    define('MUSEUM_NAME', 'Museum');
+}
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Create database connection
 try {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);

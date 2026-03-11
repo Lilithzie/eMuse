@@ -133,7 +133,17 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             <form method="GET" action="tours.php">
                 <div class="filter-group">
                     <label for="date">Filter by Date:</label>
-                    <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($date_filter); ?>">
+                    <div class="date-input-wrap">
+                        <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($date_filter); ?>">
+                        <button type="button" class="date-icon-btn" onclick="this.previousElementSibling.showPicker()" title="Pick date">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label for="search">Search Tours:</label>
@@ -196,38 +206,27 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                                 <p><?php echo htmlspecialchars($tour['description']); ?></p>
 
                                 <!-- Tour Details -->
-                                <div style="margin-top: 1rem; padding: 1rem; background-color: #f9f9f9; border-radius: 4px;">
-                                    <p class="text-muted" style="margin-bottom: 0.5rem;">
-                                        <strong>📅 Date:</strong> <?php echo date('l, F d, Y', strtotime($tour['tour_date'])); ?>
-                                    </p>
-                                    <p class="text-muted" style="margin-bottom: 0.5rem;">
-                                        <strong>⏰ Time:</strong> <?php echo date('g:i A', strtotime($tour['start_time'])); ?> - <?php echo date('g:i A', strtotime($tour['end_time'])); ?>
-                                    </p>
-                                    <p class="text-muted" style="margin-bottom: 0.5rem;">
-                                        <strong>💰 Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?> per person
-                                    </p>
+                                <div style="margin-top: 1rem; display:flex; flex-wrap:wrap; gap:.5rem; align-items:center;">
+                                    <span class="location-badge" style="background:var(--chestnut-grove);color:var(--cream-harvest);font-size:.82rem;">
+                                        📅 <?php echo date('M j, Y', strtotime($tour['tour_date'])); ?> · <?php echo date('g:i A', strtotime($tour['start_time'])); ?>
+                                    </span>
+                                    <?php if (!empty($tour['end_time'])): ?>
+                                    <span class="location-badge" style="font-size:.82rem;">ends <?php echo date('g:i A', strtotime($tour['end_time'])); ?></span>
+                                    <?php endif; ?>
                                 </div>
 
-                                <!-- Capacity Information -->
-                                <div style="margin-top: 1rem;">
-                                    <p style="font-weight: 600; margin-bottom: 0.5rem;">Tour Capacity:</p>
-                                    <div class="capacity-info">
-                                        <div class="capacity-bar">
-                                            <div class="capacity-fill" style="width: <?php echo min($capacity_percent, 100); ?>%; background: linear-gradient(90deg, var(--primary-light), #ffd89b);">
-                                                <?php if ($capacity_percent > 10) echo $tour['current_bookings'] . '/' . $tour['max_capacity']; ?>
-                                            </div>
-                                        </div>
-                                        <span class="text-muted" style="white-space: nowrap; margin-left: 0.5rem;">
-                                            <?php echo max(0, $available); ?> spots available
-                                        </span>
-                                    </div>
-                                </div>
+                                <p style="margin-top:.9rem;"><strong>Price:</strong> ₱<?php echo number_format($tour['price'] ?? 0, 2); ?></p>
+
+                                <!-- Availability -->
+                                <p style="margin-top:.4rem;font-weight:600;color:<?php echo $available > 0 ? '#2e7d32' : '#c62828'; ?>">
+                                    <strong>Availability:</strong> <?php echo $available > 0 ? $available.' spots available' : 'Fully Booked'; ?>
+                                </p>
                             </div>
                             <div class="card-footer">
                                 <?php if ($available > 0 && !$is_past): ?>
                                     <span class="card-badge" style="background-color: #4CAF50; color: white;">Available</span>
                                     <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
-                                        <a href="login.php" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration:none;">
+                                        <a href="login.php" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration:none;" onclick="openAuthPanel('login'); return false;">
                                             Login to Book
                                         </a>
                                     <?php else: ?>

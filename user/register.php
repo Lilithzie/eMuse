@@ -5,6 +5,16 @@ $error = '';
 $success = '';
 $isAjax = false;
 
+// Redirect direct GET visits — registration is now handled via the side panel
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!empty($_SESSION['user_logged_in'])) {
+        header('Location: my-account.php');
+        exit();
+    }
+    header('Location: index.php?panel=register');
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isAjax = isset($_POST['_ajax']) && $_POST['_ajax'] === '1';
     $username = sanitize($_POST['username']);

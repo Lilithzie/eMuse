@@ -10,7 +10,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eMuse - Museum Management System</title>
+    <title><?php echo MUSEUM_NAME; ?></title>
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo filemtime('../assets/css/style.css'); ?>">
     <style>
         /* ── Auth Side Panels ── */
@@ -44,7 +44,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             justify-content: space-between;
             align-items: flex-start;
             padding: 1.5rem 1.75rem;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--chestnut-grove) 100%);
+            background: var(--primary-dark);
             flex-shrink: 0;
         }
         .auth-panel-title {
@@ -116,6 +116,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
             border-left: 4px solid #558b2f;
             color: #33691e;
         }
+        .auth-panel-alert.info {
+            background: #f5f0e1;
+            border: 1px solid var(--smoky-oak, #8B9A6B);
+            border-left: 4px solid var(--primary-dark, #2A3520);
+            color: var(--primary-dark, #2A3520);
+        }
 
         .auth-panel-footer-link {
             margin-top: 1.1rem;
@@ -148,6 +154,31 @@ $current_page = basename($_SERVER['PHP_SELF']);
         @media (max-width: 480px) {
             .auth-side-panel { width: 100%; right: -100%; }
         }
+
+        /* Password toggle inside panels */
+        .auth-panel-body .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .auth-panel-body .password-wrapper input {
+            flex: 1;
+            padding-right: 2.8rem;
+        }
+        .auth-panel-body .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--smoky-oak);
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .auth-panel-body .toggle-password:hover { color: var(--chestnut-grove); }
     </style>
 </head>
 <body>
@@ -360,12 +391,48 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     btn.disabled = false; btn.textContent = 'Register';
                 });
         });
+
+        // Auto-open panel if redirected from login.php or register.php
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const panel = params.get('panel');
+            if (panel === 'login' || panel === 'register') {
+                openAuthPanel(panel);
+                // Show notice message (e.g. "Please log in to purchase tickets")
+                const noticeMap = {
+                    tickets: '🎫 Please log in to purchase tickets.',
+                    cart:    '🛒 Please log in to view your cart.',
+                    shop:    '🛍️ Please log in to access the souvenir shop.',
+                    tours:   '🗺️ Please log in to book a guided tour.'
+                };
+                const msg = params.get('msg');
+                if (msg && noticeMap[msg]) {
+                    const al = document.getElementById('panel-login-alert');
+                    al.className = 'auth-panel-alert info';
+                    al.textContent = noticeMap[msg];
+                    al.style.display = 'block';
+                }
+                // Clean the ?panel= param from the URL without reloading
+                const clean = window.location.pathname;
+                history.replaceState(null, '', clean);
+            }
+        })();
+
+        // Date inputs inside .date-input-wrap: only open picker via the icon button,
+        // not when clicking the text area of the input.
+        document.addEventListener('mousedown', function(e) {
+            const input = e.target.closest('.date-input-wrap input[type="date"]');
+            if (input) {
+                e.preventDefault();
+                input.focus();
+            }
+        }, true);
     </script>
 
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="index.php"><strong>eMuse</strong></a>
+                <a href="index.php"><strong><?php echo MUSEUM_NAME; ?></strong></a>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">

@@ -2,6 +2,57 @@
 require '../config/database.php';
 include 'includes/header.php';
 
+// --- Detail view ---
+if (isset($_GET['id'])) {
+    $exhibit_id = intval($_GET['id']);
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT e.*, ec.name as classification
+             FROM exhibits e
+             LEFT JOIN exhibit_classifications ec ON e.classification_id = ec.classification_id
+             WHERE e.exhibit_id = ?"
+        );
+        $stmt->execute([$exhibit_id]);
+        $ex = $stmt->fetch();
+        if ($ex) {
+            $art_stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM artworks WHERE exhibit_id = ?");
+            $art_stmt->execute([$exhibit_id]);
+            $art_count = $art_stmt->fetch()['cnt'];
+        }
+    } catch (Exception $e) { $ex = null; }
+
+    if (!empty($ex)): ?>
+<div class="page-hero">
+    <div class="page-hero-content">
+        <h1><?php echo htmlspecialchars($ex['title']); ?></h1>
+        <p><?php echo htmlspecialchars($ex['classification'] ?? 'General'); ?></p>
+    </div>
+</div>
+<div class="container" style="padding-top:2rem;">
+    <a href="exhibits.php" class="btn btn-secondary" style="margin-bottom:1.5rem;display:inline-block;">&larr; Back to Exhibits</a>
+    <div style="background:var(--card-bg);border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.07);">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
+            <span class="card-badge status-<?php echo $ex['status']; ?>" style="font-size:1rem;padding:.3rem .9rem;"><?php echo ucfirst($ex['status']); ?></span>
+            <span style="color:var(--smoky-oak);"><?php echo date('F d, Y', strtotime($ex['start_date'])); ?> &ndash; <?php echo date('F d, Y', strtotime($ex['end_date'])); ?></span>
+            <span style="color:var(--smoky-oak);"><strong><?php echo $art_count; ?></strong> artwork<?php echo $art_count != 1 ? 's' : ''; ?></span>
+        </div>
+        <?php if (!empty($ex['description'])): ?>
+        <p style="line-height:1.8;color:var(--cocoa-bark);margin-bottom:1.5rem;"><?php echo nl2br(htmlspecialchars($ex['description'])); ?></p>
+        <?php endif; ?>
+        <?php if ($art_count > 0): ?>
+        <a href="artworks.php?exhibit=<?php echo $exhibit_id; ?>" class="btn btn-primary">View Artworks in This Exhibit</a>
+        <?php endif; ?>
+    </div>
+</div>
+    <?php else: ?>
+<div class="container" style="padding:3rem 1rem;text-align:center;">
+    <p>Exhibit not found. <a href="exhibits.php">Return to exhibits</a></p>
+</div>
+    <?php endif;
+    include 'includes/footer.php';
+    exit;
+}
+
 $selected_classification = isset($_GET['classification']) ? intval($_GET['classification']) : 0;
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 ?>
@@ -88,10 +139,9 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
                                 </p>
                             </div>
                             <div class="card-body">
-                                <p><?php echo htmlspecialchars($exhibit['description'] ?? 'No description available'); ?></p>
-                                <p class="text-muted" style="margin-top: 1rem;">
+                                <p class="text-muted" style="margin-bottom:.75rem;">
                                     <strong>Exhibition Dates:</strong><br>
-                                    <?php echo date('F d, Y', strtotime($exhibit['start_date'])); ?> - 
+                                    <?php echo date('F d, Y', strtotime($exhibit['start_date'])); ?> – 
                                     <?php echo date('F d, Y', strtotime($exhibit['end_date'])); ?>
                                 </p>
                             </div>
@@ -111,54 +161,6 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
             ?>
         </div>
 
-        <!-- Exhibit Details Modal (if ID is set) -->
-        <?php
-        if (isset($_GET['id'])) {
-            $exhibit_id = intval($_GET['id']);
-            try {
-                $stmt = $pdo->prepare("SELECT e.*, ec.name as classification 
-                                     FROM exhibits e 
-                                     LEFT JOIN exhibit_classifications ec ON e.classification_id = ec.classification_id
-                                     WHERE e.exhibit_id = ?");
-                $stmt->execute([$exhibit_id]);
-                $exhibit = $stmt->fetch();
-                
-                if ($exhibit) {
-                    // Count artworks in this exhibit
-                    $art_stmt = $pdo->prepare("SELECT COUNT(*) as count FROM artworks WHERE exhibit_id = ?");
-                    $art_stmt->execute([$exhibit_id]);
-                    $art_count = $art_stmt->fetch()['count'];
-                    ?>
-                    <div style="margin-top: 3rem; padding: 2rem; background: #f9f9f9; border-radius: 8px; border-left: 4px solid var(--primary-light);">
-                        <h2 style="color: var(--primary-dark); margin-bottom: 1rem;"><?php echo htmlspecialchars($exhibit['title']); ?></h2>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p><strong>Classification:</strong> <?php echo htmlspecialchars($exhibit['classification']); ?></p>
-                            </div>
-                            <div>
-                                <p><strong>Status:</strong> <span class="card-badge status-<?php echo $exhibit['status']; ?>"><?php echo ucfirst($exhibit['status']); ?></span></p>
-                            </div>
-                            <div>
-                                <p><strong>Artworks:</strong> <?php echo $art_count; ?></p>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <p><strong>Duration:</strong></p>
-                            <p style="color: #666;"><?php echo date('F d, Y', strtotime($exhibit['start_date'])); ?> - <?php echo date('F d, Y', strtotime($exhibit['end_date'])); ?></p>
-                        </div>
-                        <div>
-                            <p><strong>Description:</strong></p>
-                            <p style="color: #666; line-height: 1.8;"><?php echo nl2br(htmlspecialchars($exhibit['description'])); ?></p>
-                        </div>
-                        <div style="margin-top: 1.5rem;">
-                            <a href="artworks.php?exhibit=<?php echo $exhibit_id; ?>" class="btn btn-primary">View Artworks in This Exhibit</a>
-                        </div>
-                    </div>
-                    <?php
-                }
-            } catch (Exception $e) {}
-        }
-        ?>
     </div>
 
 <?php include 'includes/footer.php'; ?>

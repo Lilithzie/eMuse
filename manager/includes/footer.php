@@ -1,6 +1,6 @@
         </div><!-- .content -->
-    </div><!-- .main-content -->
+    </main><!-- .main-content -->
 </div><!-- .admin-layout -->
-<script src="<?= SITE_URL ?>/assets/js/main.js"></script>
+<script src="../assets/js/main.js"></script>
 </body>
 </html>

@@ -47,11 +47,11 @@ include 'includes/header.php';
         <table class="data-table">
             <thead>
                 <tr>
+                    <th>Date</th>
+                    <th>Time</th>
                     <th>ID</th>
                     <th>Tour Title</th>
                     <th>Guide</th>
-                    <th>Date</th>
-                    <th>Time</th>
                     <th>Capacity</th>
                     <th>Bookings</th>
                     <th>Price</th>
@@ -62,11 +62,11 @@ include 'includes/header.php';
             <tbody>
                 <?php foreach ($tours as $tour): ?>
                 <tr>
+                    <td><?php echo formatDate($tour['tour_date']); ?></td>
+                    <td><?php echo date('g:i A', strtotime($tour['start_time'])); ?></td>
                     <td><?php echo $tour['tour_id']; ?></td>
                     <td><?php echo $tour['title']; ?></td>
                     <td><?php echo $tour['guide_name'] ?? 'Not assigned'; ?></td>
-                    <td><?php echo formatDate($tour['tour_date']); ?></td>
-                    <td><?php echo date('g:i A', strtotime($tour['start_time'])); ?></td>
                     <td><?php echo $tour['max_capacity']; ?></td>
                     <td>
                         <span class="booking-count" style="color: <?php echo $tour['current_bookings'] >= $tour['max_capacity'] ? '#f44336' : '#4caf50'; ?>">

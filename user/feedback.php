@@ -97,8 +97,8 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
                 <?php if (!isset($_SESSION['user_logged_in']) || !$_SESSION['user_logged_in']): ?>
                 <div style="padding:2rem;text-align:center;background:#f9f9f9;border-radius:8px;border:2px dashed var(--primary-light);">
                     <p style="font-size:1.1rem;color:#666;margin-bottom:1rem;">Please login to submit your feedback</p>
-                    <a href="login.php" class="btn btn-primary" style="margin-right:.5rem;">Login</a>
-                    <a href="register.php" class="btn btn-secondary">Register</a>
+                    <a href="login.php" class="btn btn-primary" style="margin-right:.5rem;" onclick="openAuthPanel('login'); return false;">Login</a>
+                    <a href="register.php" class="btn btn-secondary" onclick="openAuthPanel('register'); return false;">Register</a>
                 </div>
                 <?php else: ?>
                 <form method="POST">
@@ -112,7 +112,17 @@ $avgStats = $pdo->query("SELECT ROUND(AVG(rating),1) as avg_overall, ROUND(AVG(e
                     </div>
                     <div class="form-group">
                         <label>Visit Date</label>
-                        <input type="date" name="visit_date" max="<?= date('Y-m-d') ?>">
+                        <div class="date-input-wrap">
+                            <input type="date" name="visit_date" max="<?= date('Y-m-d') ?>">
+                            <button type="button" class="date-icon-btn" onclick="this.previousElementSibling.showPicker()" title="Pick date">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Category</label>

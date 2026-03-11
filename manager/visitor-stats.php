@@ -7,36 +7,36 @@ $dateTo   = $_GET['date_to']   ?? date('Y-m-d');
 
 // Daily breakdowns
 $visitorStats = $pdo->prepare("
-    SELECT vs.stat_date, vs.entry_count, vs.exit_count, vs.unique_visitors,
+    SELECT vs.visit_date,
+           vs.total_visitors,
            COUNT(DISTINCT t.ticket_id) as tickets_sold
     FROM visitor_stats vs
-    LEFT JOIN tickets t ON t.purchase_date = vs.stat_date
-    WHERE vs.stat_date BETWEEN :from AND :to
-    GROUP BY vs.stat_date, vs.entry_count, vs.exit_count, vs.unique_visitors
-    ORDER BY vs.stat_date DESC
+    LEFT JOIN tickets t ON DATE(t.purchase_date) = vs.visit_date
+    WHERE vs.visit_date BETWEEN :from AND :to
+    GROUP BY vs.visit_date, vs.total_visitors
+    ORDER BY vs.visit_date DESC
 ");
 $visitorStats->execute([':from'=>$dateFrom, ':to'=>$dateTo]);
 $rows = $visitorStats->fetchAll();
 
 // Ticket type breakdown
 $ticketTypes = $pdo->prepare("
-    SELECT tt.name as type_name, COUNT(t.ticket_id) as count
-    FROM tickets t
-    JOIN ticket_types tt ON t.ticket_type_id = tt.ticket_type_id
-    WHERE t.purchase_date BETWEEN :from AND :to
-    GROUP BY tt.ticket_type_id, tt.name
+    SELECT ticket_type as type_name, COUNT(ticket_id) as count
+    FROM tickets
+    WHERE DATE(purchase_date) BETWEEN :from AND :to
+    GROUP BY ticket_type
     ORDER BY count DESC
 ");
 $ticketTypes->execute([':from'=>$dateFrom, ':to'=>$dateTo]);
 $typeBreakdown = $ticketTypes->fetchAll();
 
 // Totals
-$stmt = $pdo->prepare("SELECT COALESCE(SUM(entry_count),0), COALESCE(SUM(exit_count),0), COUNT(*) as days FROM visitor_stats WHERE stat_date BETWEEN ? AND ?");
+$stmt = $pdo->prepare("SELECT COALESCE(SUM(total_visitors),0), COUNT(*) as days FROM visitor_stats WHERE visit_date BETWEEN ? AND ?");
 $stmt->execute([$dateFrom, $dateTo]); $totals = $stmt->fetch(PDO::FETCH_NUM);
-[$totalEntries, $totalExits, $totalDays] = $totals;
+[$totalEntries, $totalDays] = $totals;
 
 // Tickets sold
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE purchase_date BETWEEN ? AND ?"); $stmt->execute([$dateFrom, $dateTo]); $totalTickets = $stmt->fetchColumn();
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE DATE(purchase_date) BETWEEN ? AND ?"); $stmt->execute([$dateFrom, $dateTo]); $totalTickets = $stmt->fetchColumn();
 
 include 'includes/header.php';
 ?>
@@ -59,8 +59,7 @@ include 'includes/header.php';
 </form>
 
 <div class="stats-grid" style="margin-bottom:2rem;">
-    <div class="stat-card"><div class="stat-content"><h3><?= number_format($totalEntries) ?></h3><p>Total Entries</p></div></div>
-    <div class="stat-card"><div class="stat-content"><h3><?= number_format($totalExits) ?></h3><p>Total Exits</p></div></div>
+    <div class="stat-card"><div class="stat-content"><h3><?= number_format($totalEntries) ?></h3><p>Total Visitors</p></div></div>
     <div class="stat-card"><div class="stat-content"><h3><?= number_format($totalTickets) ?></h3><p>Tickets Sold</p></div></div>
     <div class="stat-card"><div class="stat-content"><h3><?= $totalDays > 0 ? number_format($totalEntries/$totalDays,1) : '—' ?></h3><p>Avg Daily Visitors</p></div></div>
 </div>
@@ -70,17 +69,15 @@ include 'includes/header.php';
     <div class="card">
         <div class="card-header"><h3>Daily Visitor Log</h3></div>
         <table class="data-table">
-            <thead><tr><th>Date</th><th>Entries</th><th>Exits</th><th>Unique Visitors</th><th>Tickets Sold</th></tr></thead>
+            <thead><tr><th>Date</th><th>Visitors</th><th>Tickets Sold</th></tr></thead>
             <tbody>
                 <?php if (!$rows): ?>
-                <tr><td colspan="5" style="text-align:center;padding:2rem;color:#999;">No visitor data for selected period.</td></tr>
+                <tr><td colspan="3" style="text-align:center;padding:2rem;color:#999;">No visitor data for selected period.</td></tr>
                 <?php endif; ?>
                 <?php foreach ($rows as $r): ?>
                 <tr>
-                    <td><?= date('D, M j, Y', strtotime($r['stat_date'])) ?></td>
-                    <td><?= number_format($r['entry_count']) ?></td>
-                    <td><?= number_format($r['exit_count']) ?></td>
-                    <td><?= number_format($r['unique_visitors'] ?? 0) ?></td>
+                    <td><?= date('D, M j, Y', strtotime($r['visit_date'])) ?></td>
+                    <td><?= number_format($r['total_visitors']) ?></td>
                     <td><?= number_format($r['tickets_sold']) ?></td>
                 </tr>
                 <?php endforeach; ?>

@@ -1,5 +1,5 @@
 <?php
-require '../config/database.php';
+require '../config/config.php';
 
 $code = strtoupper(trim($_GET['code'] ?? ''));
 if (!$code) { echo "Invalid request."; exit; }
@@ -17,7 +17,7 @@ $statusColors = ['confirmed'=>'#1565c0','used'=>'#2e7d32','cancelled'=>'#c62828'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eMuse Ticket — <?= htmlspecialchars($ticket['ticket_code']) ?></title>
+    <title><?php echo MUSEUM_NAME; ?> Ticket — <?= htmlspecialchars($ticket['ticket_code']) ?></title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -37,7 +37,7 @@ $statusColors = ['confirmed'=>'#1565c0','used'=>'#2e7d32','cancelled'=>'#c62828'
             display: flex;
         }
         .ticket-left {
-            background: linear-gradient(160deg, #3D4A2F 0%, #2A3520 100%);
+            background: #2A3520;
             color: #F5F0E1;
             padding: 2.5rem 2rem;
             min-width: 220px;
@@ -170,7 +170,7 @@ $statusColors = ['confirmed'=>'#1565c0','used'=>'#2e7d32','cancelled'=>'#c62828'
     <div class="ticket">
         <!-- Left: Logo + QR -->
         <div class="ticket-left">
-            <div class="museum-name">eMuse</div>
+            <div class="museum-name"><?php echo MUSEUM_NAME; ?></div>
             <div class="museum-sub">Museum</div>
             <div class="qrcode-box">
                 <div id="qrcode"></div>
@@ -181,7 +181,7 @@ $statusColors = ['confirmed'=>'#1565c0','used'=>'#2e7d32','cancelled'=>'#c62828'
         <!-- Right: Details -->
         <div class="ticket-right">
             <div class="ticket-type-badge"><?= htmlspecialchars($typeLabels[$ticket['ticket_type']] ?? ucfirst($ticket['ticket_type'])) ?> Ticket</div>
-            <div class="ticket-title">eMuse Museum — General Admission</div>
+            <div class="ticket-title"><?php echo MUSEUM_NAME; ?> — General Admission</div>
 
             <div class="detail-row">
                 <span class="label">Visitor</span>

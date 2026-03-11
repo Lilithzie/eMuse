@@ -6,7 +6,7 @@ $today = date('Y-m-d');
 $month = date('Y-m');
 
 // Today's visitors
-$stmt = $pdo->prepare("SELECT COALESCE(SUM(entry_count),0) FROM visitor_stats WHERE stat_date=?"); $stmt->execute([$today]); $todayVisitors = $stmt->fetchColumn();
+$stmt = $pdo->prepare("SELECT COALESCE(SUM(total_visitors),0) FROM visitor_stats WHERE visit_date=?"); $stmt->execute([$today]); $todayVisitors = $stmt->fetchColumn();
 // Today's revenue from tickets
 $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount_paid),0) FROM tickets WHERE purchase_date=?"); $stmt->execute([$today]); $ticketRevToday = $stmt->fetchColumn();
 // Today's revenue from shop
@@ -19,7 +19,7 @@ $totalRevToday = $ticketRevToday + $shopRevToday + $tourRevToday;
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tours WHERE tour_date=? AND status IN ('scheduled','ongoing')"); $stmt->execute([$today]); $activeTours = $stmt->fetchColumn();
 
 // Outstanding maintenance alerts
-$stmt = $pdo->query("SELECT COUNT(*) FROM maintenance_alerts WHERE status='active'"); $maintAlerts = $stmt->fetchColumn();
+$stmt = $pdo->query("SELECT COUNT(*) FROM maintenance_alerts WHERE is_acknowledged=FALSE"); $maintAlerts = $stmt->fetchColumn();
 
 // Average feedback rating this month
 $stmt = $pdo->prepare("SELECT ROUND(AVG(rating),1) FROM visitor_feedback WHERE YEAR(created_at)=YEAR(?) AND MONTH(created_at)=MONTH(?)"); $stmt->execute([$today, $today]); $avgRating = $stmt->fetchColumn();
@@ -34,7 +34,7 @@ $totalRevMonth = $ticketRevMonth + $shopRevMonth + $tourRevMonth;
 $recentFeedback = $pdo->query("SELECT *, rating as overall_rating, feedback_text as comments FROM visitor_feedback ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
 // Pending maintenance alerts
-$alerts = $pdo->query("SELECT ma.*, e.name as equip_name FROM maintenance_alerts ma LEFT JOIN equipment e ON ma.equipment_id = e.equipment_id WHERE ma.status='active' ORDER BY ma.created_at DESC LIMIT 5")->fetchAll();
+$alerts = $pdo->query("SELECT ma.*, e.name as equip_name FROM maintenance_alerts ma LEFT JOIN equipment e ON ma.equipment_id = e.equipment_id WHERE ma.is_acknowledged=FALSE ORDER BY ma.created_at DESC LIMIT 5")->fetchAll();
 
 include 'includes/header.php';
 ?>

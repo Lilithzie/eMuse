@@ -6,7 +6,48 @@ $guide = $pdo->prepare("SELECT g.* FROM tour_guides g JOIN admin_users a ON g.ad
 $guide->execute([$_SESSION['admin_id']]); $guide = $guide->fetch();
 
 $tour_id = (int)($_GET['tour_id'] ?? 0);
-if (!$guide || !$tour_id) { header('Location: my-tours.php'); exit(); }
+
+// No tour_id — show tour selection list
+if (!$tour_id) {
+    $allTours = $pdo->prepare("
+        SELECT t.*,
+               (SELECT COALESCE(SUM(tb.number_of_people),0) FROM tour_bookings tb WHERE tb.tour_id=t.tour_id AND tb.status='confirmed') as booked
+        FROM tours t
+        WHERE t.guide_id = ?
+        ORDER BY t.tour_date DESC, t.start_time ASC
+    ");
+    $allTours->execute([$guide['guide_id'] ?? 0]);
+    $tourList = $allTours->fetchAll();
+
+    include 'includes/header.php';
+    ?>
+    <div class="page-header">
+        <h1>Participant Lists</h1>
+        <p style="color:#666;">Select a tour to view its participants</p>
+    </div>
+    <?php if ($tourList): ?>
+    <div style="display:grid;gap:1rem;">
+        <?php foreach ($tourList as $t): ?>
+        <div class="card" style="padding:1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <strong><?= htmlspecialchars($t['title']) ?></strong>
+                <p style="color:#666;margin:.25rem 0 0;"><?= date('F j, Y', strtotime($t['tour_date'])) ?> &bull; <?= date('g:i A', strtotime($t['start_time'])) ?> &bull; <?= $t['booked'] ?>/<?= $t['max_capacity'] ?> participants</p>
+            </div>
+            <a href="tour-participants.php?tour_id=<?= $t['tour_id'] ?>" class="btn btn-primary btn-sm">View Participants</a>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <div style="text-align:center;padding:3rem;color:#999;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p style="margin-top:1rem;">No tours assigned yet.</p>
+    </div>
+    <?php endif;
+    include 'includes/footer.php';
+    exit();
+}
+
+if (!$guide) { header('Location: my-tours.php'); exit(); }
 
 // Verify this tour belongs to this guide
 $tour = $pdo->prepare("SELECT * FROM tours WHERE tour_id=? AND guide_id=?");
